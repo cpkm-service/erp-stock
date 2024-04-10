@@ -1,0 +1,24 @@
+{
+    "name": "cpkm/erp-stock",
+    "autoload": {
+        "psr-4": {
+            "Cpkm\\ErpStock\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cpkm\\ErpStock\\ErpStockServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Henry",
+            "email": "asdcxz179@gmail.com"
+        }
+    ],
+    "require": {
+        "Cpkm/Admin": "*"
+    }
+}
