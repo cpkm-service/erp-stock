@@ -21,31 +21,29 @@ class ErpStockServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->configureRateLimiting();
-        // $this->mergeConfigFrom(__DIR__.'/../config/excel.php', 'excel');
+        $this->mergeConfigFrom(__DIR__.'/../config/erp-stock.php', 'erp-stock');
 
-        // $this->loadRoutesFrom(__DIR__.'/../routes/web.php','excel');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views/excel', 'excel');
-        // $this->loadTranslationsFrom(__DIR__.'/../lang', 'excel');
-        // $this->loadMigrationsFrom(__DIR__ .'/../database/migrations');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php','erp-stock');
+        $this->loadViewsFrom(__DIR__.'/../resources/views/erp-stock', 'erp-stock');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'erp-stock');
+        $this->loadMigrationsFrom(__DIR__ .'/../database/migrations');
 
-        // $this->publishes([
-        //     __DIR__.'/../resources/views/excel' => resource_path('views/vendor/excel'),
-        // ], 'excel-views');
+        $this->publishes([
+            __DIR__.'/../resources/views/erp-stock' => resource_path('views/vendor/erp-stock'),
+        ], 'erp-stock-views');
 
-        // $this->publishes([
-        //     __DIR__.'/../lang' => lang_path('vendor/excel'),
-        // ], 'excel-translations');
+        $this->publishes([
+            __DIR__.'/../lang' => lang_path('vendor/erp-stock'),
+        ], 'erp-stock-translations');
 
-        // $this->publishes([
-        //     __DIR__.'/../config/excel.php' => config_path('excel.php'),
-        // ], 'excel-config');
+        $this->publishes([
+            __DIR__.'/../config/erp-stock.php' => config_path('erp-stock.php'),
+        ], 'erp-stock-config');
         
-        // $this->publishes([
-        //     __DIR__.'/../database/migrations' => database_path('migrations'),
-        // ], 'excel-migrations');
-
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'erp-stock-migrations');
         
-        // Blade::componentNamespace('Cpkm\\Excel\\View\\Components\\Backend', 'backend');
     }
 
     /**
