@@ -77,8 +77,8 @@
                                                             <th class="text-center">{{($item->size)}}</th>
                                                             <th class="text-center">{{($item->count)}}</th>
                                                             <th class="text-center">{{($item->unit)}}</th>
-                                                            <th class="text-center">{{$item->purchase_order_items->first()?->sourceable->no}}</th>
-                                                            <th class="text-center">{{$item->purchase_order_items->first()?->sourceable->id}}</th>
+                                                            <th class="text-center">{{$item->purchase_order_items?->first()?->sourceable?->no}}</th>
+                                                            <th class="text-center">{{$item->purchase_order_items?->first()?->sourceable?->id}}</th>
                                                             <td class="text-center">{{number_format($purchase_order_item->count)}}</td>
                                                             <th class="text-center">{{number_format($item->count - $purchase_order_item->count)}}</th>
                                                             <td class="text-center">{{number_format($purchase_order_item->restock_order_items->sum('count'))}}</td>
