@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Sales;
+namespace Cpkm\ErpStock\Service\Sales;
 
 use App\Models\SalesOrderItem;
 use App\Exceptions\ErrorException;
@@ -103,8 +103,8 @@ class OrderItemService
      * @return void
      */
     public function setItems($model, $data) {
-        $ProductService = app(ProductService::class);
-        $review_setting = ReviewSetting::where('model',\App\Models\Product::class)->first();
+        $ProductService = app(\App\Service\ProductService::class);
+        $review_setting = \App\Models\ReviewSetting::where('model',\App\Models\Product::class)->first();
         if($review_setting) {
             $review_events_id = $review_setting->review_events_id;
         }
@@ -116,6 +116,7 @@ class OrderItemService
                     $product = $ProductService->index(['product_serial' => $item['product_number']], false)->first();
                     if(!$product) {
                         $product = $ProductService->store([
+                            'customers_id'      =>  null,
                             'product_serial'    =>  $item['product_number'],
                             'image_serial'      =>  $item['product_number'],
                             'review_events_id'  =>  $review_events_id??0,
@@ -129,9 +130,9 @@ class OrderItemService
                     $item['standard']   = $product->product_standard;
                     $item['size']       = $product->size;
                 }
-                $sales_quote_order_item = $this->SalesOrderItemRepository->find($item['id']);
-                if(!isset($item['file'])) {
-                    $item['file'] = $sales_quote_order_item->file;
+                
+                if(isset($item['file']) && $item['file'] && $item['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $item['file'] = $item['file']->storeAs($this->items_folder, date('YmdHis')."-".$item['file']->getClientOriginalName() , 'public');
                 }
 
                 // $item['sort'] = $sort;
@@ -225,11 +226,11 @@ class OrderItemService
         $tax_percentage = $this->SystemSettingRepository->getSetting('tax_percentage');
         $decimal_point = $this->SystemSettingRepository->getSetting('decimal_point');
         // $main_currency = $this->SystemSettingRepository->getSetting('main_currency');
-        $currency = Currency::find($data['currencies_id']);
+        $currency = \App\Models\Currency::find($data['currencies_id']);
         $exchange = $currency?->exchange??0;
         foreach ($data['items'] as $key => $item) {
             $amount = (float)bcmul($item['count'], $item['unit_amount'] , $decimal_point);
-            $tax = (float)bcmul($amount, $tax_percentage, $decimal_point);
+            $tax = (float)bcmul($amount, ($tax_percentage / 100), $decimal_point);
             //免稅
             if($invoice_type == 3) {
                 $tax = 0;

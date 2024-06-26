@@ -61,15 +61,13 @@ trait OrderTrait
     }
 
     public function init() {
-        $this->form['fields']['staff_id']['options'] = $this->StaffService->select();
         $this->form['fields']['customer_staff_id']['options']  = $this->form['fields']['staff_id']['options'];
-        $this->form['fields']['factory_staff_id']['options'] = $this->form['fields']['make_id']['options'] = $this->form['fields']['staff_id']['options'];
         $this->form['fields']['factory_id']['options'] = $this->CustomerService->select(2);
         $this->form['fields']['customers_id']['options'] = $this->CustomerService->select();
         $this->form['fields']['departments_id']['options'] = $this->DepartmentService->select();
-        $this->form['fields']['companies_id']['options'] = $this->CompanyService->select();
-        $this->form['fields']['companies_id']['value'] = $this->SystemSettingsService->getSetting('company');
-        $this->form['fields']['currencies_id']['options'] = $this->CurrencyService->select();
+        $this->fields['companies_id']['options'] = $this->CompanyService->select();
+        $this->fields['companies_id']['value'] = $this->SystemSettingsService->getSetting('company');
+        $this->fields['currencies_id']['options'] = $this->CurrencyService->select();
         $this->form['fields']['items']['products_id']['options'] = $this->ProductService->select();
         $this->form['fields']['items']['depots_id']['options'] = $this->DepotService->select();
         $this->form['fields']['factory_payment_method']['options'] = collect(__('payment_method'))->map(function($item, $key) {
@@ -78,23 +76,27 @@ trait OrderTrait
                 'name'  =>  $item,
             ];
         })->toArray();
-        $this->form['fields']['invoice_types_id']['options'] = $this->form['fields']['items']['invoice_types_id']['options'] = InvoiceType::all()->map(function($item){
+        $this->fields['invoice_types_id']['options'] = $this->form['fields']['items']['invoice_types_id']['options'] = InvoiceType::all()->map(function($item){
             return [
                 'value' =>  $item->id,
                 'name'  =>  $item->name,
             ];
         })->toArray();
-        $this->form['fields']['invoice_methods_id']['options'] = InvoiceMethod::all()->map(function($item){
-            return [
-                'value' =>  $item->id,
-                'name'  =>  $item->name,
-            ];
-        })->toArray();
-        $this->form['fields']['invoice_categories_id']['options'] = InvoiceCategory::all()->map(function($item){
-            return [
-                'value' =>  $item->id,
-                'name'  =>  $item->name,
-            ];
-        })->toArray();
+        if($this->fields['invoice_methods_id']??false) {
+            $this->fields['invoice_methods_id']['options'] = InvoiceMethod::all()->map(function($item){
+                return [
+                    'value' =>  $item->id,
+                    'name'  =>  $item->name,
+                ];
+            })->toArray();
+        }
+        if($this->fields['invoice_categories_id']??false){
+            $this->fields['invoice_categories_id']['options'] = InvoiceCategory::all()->map(function($item){
+                return [
+                    'value' =>  $item->id,
+                    'name'  =>  $item->name,
+                ];
+            })->toArray();
+        }
     }
 }

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuoteOrder extends Model
 {
-    use HasFactory, \App\Traits\ObserverTrait, \App\Traits\QueryTrait;
+    protected $table = 'sales_quote_orders';
+
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
         'date',
         'no',
-        'source_no',
         'delivery_date',
         'quote_start_date',
         'quote_end_date',
@@ -36,6 +37,7 @@ class QuoteOrder extends Model
         'sales_quote_order_statuses_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     protected $casts = [
@@ -52,7 +54,6 @@ class QuoteOrder extends Model
         'only' => [
             'date',
             'no',
-            'source_no',
             'delivery_date',
             'quote_start_date',
             'quote_end_date',
@@ -76,6 +77,7 @@ class QuoteOrder extends Model
             'sales_quote_order_statuses_id',
             'customer_address',
             'customer_phone',
+            'project_managements_id',
         ],
     ];
 
@@ -83,7 +85,6 @@ class QuoteOrder extends Model
         'id',
         'date',
         'no',
-        'source_no',
         'delivery_date',
         'quote_start_date',
         'quote_end_date',
@@ -92,7 +93,6 @@ class QuoteOrder extends Model
         'customers_id',
         'customer_contacts_id',
         'currencies_id',
-        'name',
         'invoice_types_id',
         'amount',
         'tax',
@@ -107,6 +107,7 @@ class QuoteOrder extends Model
         'sales_quote_order_statuses_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     public $with = [
@@ -116,13 +117,27 @@ class QuoteOrder extends Model
         'items',
         'contact',
         'status',
+        'project',
+        'sourceable',
     ];
-
+    
+    /**
+     * 來源單
+     *
+     * @return void
+     */
+    public function sourceable() {
+        return $this->morphTo();
+    }
+    
+    /**
+     * 報價單項目
+     *
+     * @return void
+     */
     public function items()
     {
-        return $this->morphToMany(SalesOrderItem::class, 'sales_order_itemable')->with(['product' => function($query){
-            $query->select(['id', 'product_name', 'size', 'product_standard', 'product_serial']);
-        }]);
+        return $this->morphMany(QuoteOrderItem::class, 'sourceable');
     }
     
     /**
@@ -131,7 +146,7 @@ class QuoteOrder extends Model
      * @return void
      */
     public function staff() {
-        return $this->hasOne(Staff::class, 'id', 'staff_id');
+        return $this->hasOne(\App\Models\Staff::class, 'id', 'staff_id');
     }
     
     /**
@@ -140,7 +155,7 @@ class QuoteOrder extends Model
      * @return void
      */
     public function customer() {
-        return $this->hasOne(Customer::class, 'id', 'customers_id');
+        return $this->hasOne(\App\Models\Customer::class, 'id', 'customers_id');
     }
     
     /**
@@ -149,19 +164,43 @@ class QuoteOrder extends Model
      * @return void
      */
     public function department() {
-        return $this->hasOne(Department::class, 'id', 'departments_id');
+        return $this->hasOne(\App\Models\Department::class, 'id', 'departments_id');
     }
-
+    
+    /**
+     * 專案
+     *
+     * @return void
+     */
+    public function project() {
+        return $this->hasOne(\App\Models\ProjectManagement::class, 'id', 'project_managements_id');
+    }
+    
+    /**
+     * 聯絡人
+     *
+     * @return void
+     */
     public function contact() {
-        return $this->hasOne(CustomerContact::class, 'id', 'customer_contacts_id');
+        return $this->hasOne(\App\Models\CustomerContact::class, 'id', 'customer_contacts_id');
     }
-
+    
+    /**
+     * 關聯單
+     *
+     * @return void
+     */
     public function order() {
         return $this->morphMany(SalesOrder::class, 'sourceable');
     }
-
+    
+    /**
+     * 報價單狀態
+     *
+     * @return void
+     */
     public function status() {
-        return $this->hasOne(SalesQuoteOrderStatus::class, 'id', 'sales_quote_order_statuses_id');
+        return $this->hasOne(QuoteOrderStatus::class, 'id', 'sales_quote_order_statuses_id');
     }
 
     public function getCloseAttribute() {

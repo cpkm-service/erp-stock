@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Service\Sales;
+namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\SalesQuoteOrder;
 use App\Models\Staff;
 use Illuminate\Support\Arr;
 use App\Exceptions\ErrorException;
@@ -15,7 +14,7 @@ use App\Models\Currency;
 /**
  * Class QuoteOrderService.
  */
-class QuoteOrderService extends QuoteOrderItemService
+class QuoteOrderService extends OrderItemService
 {
     /** 
      * @access protected
@@ -31,14 +30,16 @@ class QuoteOrderService extends QuoteOrderItemService
      * @author Henry
     **/
     protected $SystemSettingRepository;
+
+    protected $items_folder = 'sales_quote_order_items';
     
     /** 
      * 建構子
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(SalesQuoteOrder $SalesQuoteOrder, Staff $Staff, SystemSetting $SystemSetting) {
-        $this->SalesQuoteOrderRepository      =   $SalesQuoteOrder;
+    public function __construct(Staff $Staff, SystemSetting $SystemSetting) {
+        $this->SalesQuoteOrderRepository      =   app(config('erp-stock.sales_quote_orders.model'));
         $this->StaffRepository      =   $Staff;
         $this->SystemSettingRepository = $SystemSetting;
     }
@@ -66,7 +67,7 @@ class QuoteOrderService extends QuoteOrderItemService
      */
     public function makeNo($date) {
         $no = (new \Carbon\Carbon($date))->format('Ymd');
-        $count = SalesQuoteOrder::where('no', 'like', $no."%")->count() + 1;
+        $count = $this->SalesQuoteOrderRepository->where('no', 'like', $no."%")->count() + 1;
         return $no.str_pad($count, 4, "0", STR_PAD_LEFT);
     }
 

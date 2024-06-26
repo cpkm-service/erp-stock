@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderStatus extends Model
 {
-    use HasFactory, \App\Traits\QueryTrait;
+    protected $table = 'sales_order_statuses';
+
+    use HasFactory, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
         'name',

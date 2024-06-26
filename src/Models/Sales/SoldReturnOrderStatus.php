@@ -5,10 +5,10 @@ namespace Cpkm\ErpStock\Models\Sales;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SoldOrderStatus extends Model
+class SoldReturnOrderStatus extends Model   
 {
-    protected $table = 'sales_sold_order_statuses';
-    
+    protected $table = 'sales_sold_return_order_statuses';
+
     use HasFactory, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
@@ -38,4 +38,5 @@ class SoldOrderStatus extends Model
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
+
 }

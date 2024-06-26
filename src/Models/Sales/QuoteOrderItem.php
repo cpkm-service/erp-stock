@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuoteOrderItem extends Model
 {
-    use HasFactory, \App\Traits\ObserverTrait;
+    protected $table = 'sales_quote_order_items';
+    
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
         'type',
@@ -33,7 +35,7 @@ class QuoteOrderItem extends Model
     ];
 
     public static $audit = [
-        'table' => SalesQuoteOrder::class,
+        'table' => QuoteOrder::class,
         //改存欄位 預設id
         'table_id' => 'sourceable_id',
 
@@ -102,6 +104,6 @@ class QuoteOrderItem extends Model
     }
 
     public function product() {
-        return $this->hasOne(Product::class, 'id', 'products_id');
+        return $this->hasOne(\App\Models\Product::class, 'id', 'products_id');
     }
 }

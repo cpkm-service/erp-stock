@@ -36,37 +36,37 @@
             {
                 data: "date",
                 className: "text-md-center fw-semibold",
-                title: "{{__('backend.sales_quote_orders.date')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.date')}}"
             },
             {
                 data: "no",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.no')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.no')}}"
             },
             {
                 data: "staff.name",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.staff_id')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.staff_id')}}"
             },
             {
                 data: "department.name",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.departments_id')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.departments_id')}}"
             },
             {
                 data: "customer.name",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.customers_id')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.customers_id')}}"
             },
             {
-                data: "name",
+                data: "project.name",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.name')}}"
+                title: "{{__('erp-stock::backend.sales_quote_orders.projects_id')}}"
             },
             {
                 data: "status.name",
                 className: "text-md-center",
-                title: "{{__('backend.sales_quote_orders.sales_quote_order_statuses_id')}}",
+                title: "{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_statuses_id')}}",
                 render:(data,type,row,meta) => {
                     switch (row.status.id) {
                         case 1:
@@ -76,7 +76,7 @@
                             str = `<span class="badge bg-primary">${data}</span>`;
                             break;
                         case 3:
-                            str = `<span class="badge bg-danger">${data}</span>`;
+                            str = `<span class="badge bg-danger">報價失效</span>`;
                             break;
                     }
                     return str;
@@ -102,8 +102,8 @@
         function(){
         },
         {
-            ordering:false,
-            order:[[0,'asc']]
+            ordering:true,
+            order:[[2,'desc']]
         }
     );
 
@@ -122,6 +122,7 @@
             if(result.isConfirmed) {
                 // Codebase.block('state_toggle','.block-rounded');
                 sendApi(`${url}/${deleteId}`,"DELETE",{}).then(function(){
+                    location.reload();
                     // console.log(123);
                     // search.ajax.reload(function(){
                     //     Codebase.block('state_toggle','.block-rounded');
