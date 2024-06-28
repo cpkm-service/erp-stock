@@ -4,14 +4,97 @@
     <div class="row mb-2">
         <div class="col-12">
             <button class="btn @if($detail->status?->id == 1) btn-warning @elseif($detail->status?->id == 2) btn-primary @else btn-danger @endif" type="button" id="close" data-id="{{$detail->id}}">{{$detail->status->name}}</button>
+            
+            @if($detail->status?->id == 1 && !$detail->order()->exists())
             <a href="{{route('backend.sales.quote_order.create',['quote_order' => request()->quote_order])}}" class="btn btn-primary">議價</a>
-            @if($detail->status?->id == 1 && !$detail->contract_order)
-            <a href="{{route('backend.sales.order.create',['sourceable_type' => \App\Models\SalesQuoteOrder::class, 'sourceable_id' => $detail->id])}}" class="btn btn-success">轉訂購單</a>
+            <a href="{{route('backend.sales.order.create',['sourceable_type' => config('erp-stock.sales_quote_orders.model'), 'sourceable_id' => $detail->id])}}" class="btn btn-success">轉訂購單</a>
             @else
-                @if($detail->order)
-                <a href="{{route('backend.sales.order.show', ['contract_order' => $detail->contract_order->id])}}" class="btn btn-info" target="_blank">訂購單</a>
+                @if($detail->order()->exists())
+                <a href="{{route('backend.sales.order.show', ['order' => $detail->order?->first()?->id])}}" class="btn btn-info" target="_blank">訂購單</a>
                 @endif
             @endif
+        </div>
+    </div>
+    @endif
+@endsection
+@section('tab')
+    @if($show??false)
+    <li class="nav-item audit-tab" role="presentation">
+        <button type="button" class="nav-link" id="transfer-record-tab" data-bs-toggle="tab" data-bs-target="#transfer-record" role="tab" aria-controls="transfer-record" aria-selected="false" tabindex="-1">
+            轉單紀錄
+        </button>
+    </li>
+    @endif
+@endsection
+@section('tab-content')
+    @if($show??false)
+    <div class="tab-pane " id="transfer-record" role="tabpanel" aria-labelledby="btabs-alt-static-home-tab">
+        <div class="accordion" id="transfer-record-list">
+            @foreach($detail->items as $item)
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transfer-record-{{$item->id}}" aria-expanded="false" aria-controls="transfer-record-{{$item->id}}">
+                        {{implode("-", array_filter([$item->name,$item->standard,$item->size]))}}
+                    </button>
+                </h2>
+                <div id="transfer-record-{{$item->id}}" class="accordion-collapse collapse" data-bs-parent="#transfer-record-list">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered w-100">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_orders.id')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.products_id')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.name')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.standard')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.size')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_orders.sales_order_items.*.count')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.unit')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_orders.date')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_orders.no')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_sold_orders.id')}}</th>
+                                            <th class="text-center">{{__('erp-stock::backend.sales_orders.sales_order_items.*.count')}}</th>
+                                            <th class="text-center">已銷數量</th>
+                                            <th class="text-center">未銷數量</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $all_count = $item->count;
+                                            $already_count = 0;
+                                        @endphp
+                                        @foreach($item->sales_order_items as $key => $sales_order_item)
+                                        @php
+                                            $already_count += $sales_order_item->count;
+                                            $all_count -= $sales_order_item->count;
+                                        @endphp
+                                        <tr>
+                                            <th class="text-center">{{($key + 1)}}</th>
+                                            <th class="text-center">{{($item->id)}}</th>
+                                            <th class="text-center">{{($item->product->product_serial)}}</th>
+                                            <th class="text-center">{{($item->name)}}</th>
+                                            <th class="text-center">{{($item->standard)}}</th>
+                                            <th class="text-center">{{($item->size)}}</th>
+                                            <th class="text-center">{{number_format($item->count)}}</th>
+                                            <th class="text-center">{{($item->unit)}}</th>
+                                            <th class="text-center">{{($sales_order_item->sourceable->date)}}</th>
+                                            <th class="text-center">{{($sales_order_item->sourceable->no)}}</th>
+                                            <th class="text-center">{{($sales_order_item->sourceable->id)}}</th>
+                                            <th class="text-center">{{number_format($sales_order_item->count)}}</th>
+                                            <th class="text-center">{{number_format($already_count)}}</th>
+                                            <th class="text-center">{{number_format($all_count)}}</th>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @endif

@@ -106,4 +106,8 @@ class QuoteOrderItem extends Model
     public function product() {
         return $this->hasOne(\App\Models\Product::class, 'id', 'products_id');
     }
+
+    public function sales_order_items() {
+        return $this->hasMany(OrderItem::class, 'sales_quote_order_items_id', 'id');
+    }
 }

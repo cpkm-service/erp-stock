@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Service\Sales;
+namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\SalesSoldOrder;
 use App\Models\SalesQuoteOrder;
 use App\Models\SalesQuoteOrderItem;
 use App\Models\Staff;
@@ -15,7 +14,7 @@ use App\Models\SystemSetting;
 /**
  * Class SoldOrderService.
  */
-class SoldOrderService extends QuoteOrderItemService
+class SoldOrderService extends OrderItemService
 {
     /** 
      * @access protected
@@ -46,13 +45,14 @@ class SoldOrderService extends QuoteOrderItemService
     **/
     protected $SystemSettingRepository;
     
+    protected $items_folder = 'sales_sold_order_items';
     /** 
      * 建構子
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(SalesSoldOrder $SalesSoldOrder, Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
-        $this->SalesSoldOrderRepository      =   $SalesSoldOrder;
+    public function __construct(Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
+        $this->SalesSoldOrderRepository      =   app(config('erp-stock.sales_sold_orders.model'));
         $this->SalesQuoteOrderRepository      =   $SalesQuoteOrder;
         $this->StaffRepository      =   $Staff;
         $this->SystemSettingRepository = $SystemSetting;
@@ -82,7 +82,7 @@ class SoldOrderService extends QuoteOrderItemService
      */
     public function makeNo($date) {
         $no = (new \Carbon\Carbon($date))->format('Ymd');
-        $count = SalesSoldOrder::where('no', 'like', $no."%")->count() + 1;
+        $count = $this->SalesSoldOrderRepository->where('no', 'like', $no."%")->count() + 1;
         return $no.str_pad($count, 4, "0", STR_PAD_LEFT);
     }
 
@@ -179,51 +179,9 @@ class SoldOrderService extends QuoteOrderItemService
         $data['customer_phone']     =   $customer_contact->phone;
         $data['departments_id']   =   $this->getDepartmentId($data['staff_id']);
         if(isset($data['file']) && $data['file'] && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
-            $data['file'] = $data['file']->storeAs('sales_order', date('YmdHis')."-".$data['file']->getClientOriginalName() , 'public');
+            $data['file'] = $data['file']->storeAs('sales_sold_order', date('YmdHis')."-".$data['file']->getClientOriginalName() , 'public');
         }
         return $data;
-    }
-
-    public function setItems($model, $data) {
-        $ProductService = app(ProductService::class);
-        $key = 'items';
-        $all_data = $model->{$key}->pluck('id')->toArray();
-        if($data[$key]??false) {
-            foreach ($data[$key] as $sort => $item) {
-                if(!$item['sales_purchase_order_items_id']) {
-                    $product = $ProductService->getProduct($item['products_id']);
-                    $item['name']       = $product->product_name;
-                    $item['standard']   = $product->product_standard;
-                    $item['size']       = $product->size;
-                    $order_item = \App\Models\SalesOrderItem::create($item);
-                    if(!$order_item) {
-                        throw new ErrorException(__('backend.errors.insertFail'), 500);
-                    }
-                    $item['sales_order_items_id'] = $order_item->id;
-                    $purchase_order_item = \App\Models\SalesPurchaseOrderItem::create($item);
-                    if(!$purchase_order_item) {
-                        throw new ErrorException(__('backend.errors.insertFail'), 500);
-                    }
-                    $item['sales_purchase_order_items_id'] = $purchase_order_item->id;
-                }
-                if(isset($item['id'])) {
-                    $search = $model->{$key}()->where([
-                        'id' => $item['id']
-                    ])->first();
-                }
-                if($search??false) {
-                    $search->update($item);
-                    unset($all_data[array_search($item['id'],$all_data)]);
-                }else{
-                    $model->{$key}()->create($item);
-                }
-            }
-        }
-        foreach ($all_data as $id) {
-            $model->{$key}()->where([
-                'id' => $id,
-            ])->delete();
-        }
     }
 
     public function close($id) {
@@ -237,6 +195,15 @@ class SoldOrderService extends QuoteOrderItemService
             throw new ErrorException(__('backend.errors.updateFail'), 500);
         }
         return $model;
+    }
+
+    public function select($where = []) {
+        return $this->SalesSoldOrderRepository->select(['id', 'project_managements_id', 'no'])->with('project')->where($where)->get()->map(function($item) {
+            return [
+                'value' =>  $item->id,
+                'name'  =>  "{$item->project?->name} ({$item->no})"
+            ];
+        })->toArray();
     }
 
 }

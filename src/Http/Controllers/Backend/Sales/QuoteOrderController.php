@@ -79,7 +79,7 @@ class QuoteOrderController extends Controller
         $data['tax_percentage'] =   $this->SystemSettingsService->getSetting('tax_percentage')??0;
         $data['decimal_point'] =   $this->SystemSettingsService->getSetting('decimal_point')??0;
         \View::share('fields',$this->fields);
-        return view('erp-stock::backend.sales.quote_order.form', $data);
+        return view('erp-stock::backend.sales.order.form', $data);
     }
 
     /**
@@ -143,6 +143,7 @@ class QuoteOrderController extends Controller
         $data['show']   =   $this->show;
         $data['tax_percentage'] =   $this->SystemSettingsService->getSetting('tax_percentage')??0;
         $data['decimal_point'] =   $this->SystemSettingsService->getSetting('decimal_point')??0;
+        unset($this->fields['items']['parameters']['product_number']);
         \View::share('fields',$this->fields);
         return view('erp-stock::backend.sales.quote_order.form',$data);
     }

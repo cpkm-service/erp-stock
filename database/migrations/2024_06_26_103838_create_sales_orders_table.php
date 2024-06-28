@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('staff_id')->nullable()->comment('人員');
             $table->string('customer_address')->nullable()->comment('客戶地址');
             $table->string('customer_phone')->nullable()->comment('客戶電話');
-            $table->unsignedBigInteger('project_managements_id')->comment('專案');
+            $table->unsignedBigInteger('project_managements_id')->nullable()->comment('專案');
             $table->date('delivery_date')->nullable()->comment('預定交貨日期');
             $table->unsignedBigInteger('invoice_types_id')->comment('扣稅類別');
             $table->unsignedBigInteger('invoice_methods_id')->comment('發票方式');

@@ -38,6 +38,7 @@ class QuoteOrder extends Model
         'customer_address',
         'customer_phone',
         'project_managements_id',
+        'make_id',
     ];
 
     protected $casts = [
@@ -53,6 +54,7 @@ class QuoteOrder extends Model
     public static $audit = [
         'only' => [
             'date',
+            'make_id',
             'no',
             'delivery_date',
             'quote_start_date',
@@ -85,6 +87,7 @@ class QuoteOrder extends Model
         'id',
         'date',
         'no',
+        'make_id',
         'delivery_date',
         'quote_start_date',
         'quote_end_date',
@@ -191,7 +194,7 @@ class QuoteOrder extends Model
      * @return void
      */
     public function order() {
-        return $this->morphMany(SalesOrder::class, 'sourceable');
+        return $this->morphMany(Order::class, 'sourceable');
     }
     
     /**

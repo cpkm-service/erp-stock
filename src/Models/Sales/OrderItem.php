@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    use HasFactory, \App\Traits\ObserverTrait, \App\Traits\QueryTrait;
+    protected $table = 'sales_order_items';
+
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
+
+    protected $appends = [
+        'yet_count',
+        'income_count',
+        'purchase_standard',
+    ];
 
     protected $fillable = [
         'type',
@@ -30,6 +38,7 @@ class OrderItem extends Model
         'size',
         'delivery_date',
         'quote_count',
+        'sales_quote_order_items_id',
     ];
 
     public static $audit = [
@@ -69,6 +78,8 @@ class OrderItem extends Model
 
     public $detail = [
         'id',
+        'sourceable_type',
+        'sourceable_id',
         'type',
         'products_id',
         'count',
@@ -89,6 +100,7 @@ class OrderItem extends Model
         'size',
         'delivery_date',
         'quote_count',
+        'sales_quote_order_items_id',
     ];
 
     protected $casts = [
@@ -103,7 +115,7 @@ class OrderItem extends Model
     }
 
     public function product() {
-        return $this->hasOne(Product::class, 'id', 'products_id');
+        return $this->hasOne(\App\Models\Product::class, 'id', 'products_id');
     }
 
     public function order() {
@@ -111,10 +123,22 @@ class OrderItem extends Model
     }
 
     public function sold_order_items() {
-        return $this->hasMany(SalesSoldOrderItem::class, 'sales_order_items_id', 'id');
+        return $this->hasMany(SoldOrderItem::class, 'sales_order_items_id', 'id');
     }
 
-    public function purchase_order_items() {
-        return $this->hasMany(SalesPurchaseOrderItem::class, 'sales_order_items_id', 'id');
+    public function sales_sold_order_items() {
+        return $this->hasMany(SoldOrderItem::class, 'sales_order_items_id', 'id');
+    }
+
+    public function getYetCountAttribute() {
+        return $this->count - $this->sold_order_items->sum('count');
+    }
+
+    public function getIncomeCountAttribute() {
+        return $this->sold_order_items->sum('count');
+    }
+
+    public function getPurchaseStandardAttribute() {
+        return route('backend.sales.order_item_standard.create',['item' => $this->id]);
     }
 }

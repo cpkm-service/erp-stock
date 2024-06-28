@@ -42,7 +42,7 @@ return new class extends Migration
             $table->decimal('main_total_amount', 16, 4)->default(0)->comment('總金額(本位幣)');
             $table->text('remark')->nullable()->comment('備註');
             $table->string('invoice')->nullable()->comment('發票號碼');
-            $table->unsignedTinyInteger('sales_sold_order_statuses_id')->default(1)->comment('狀態');
+            $table->unsignedTinyInteger('sales_sold_return_order_statuses_id')->default(1)->comment('狀態');
             $table->timestamps();
             $table->comment('銷貨退回單');
         });

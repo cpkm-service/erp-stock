@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Sales;
+namespace Cpkm\ErpStock\Service\Sales;
 
 use App\Models\SalesOrder;
 use App\Models\SalesQuoteOrder;
@@ -16,7 +16,7 @@ use App\Service\ProductService;
 /**
  * Class OrderService.
  */
-class OrderService extends QuoteOrderItemService
+class OrderService extends OrderItemService
 {
     /** 
      * @access protected
@@ -47,13 +47,15 @@ class OrderService extends QuoteOrderItemService
     **/
     protected $SystemSettingRepository;
     
+    protected $items_folder = 'sales_order_items';
+    
     /** 
      * 建構子
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(SalesOrder $SalesOrder, Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
-        $this->SalesOrderRepository      =   $SalesOrder;
+    public function __construct(Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
+        $this->SalesOrderRepository      =   app(config('erp-stock.sales_orders.model'));
         $this->SalesQuoteOrderRepository      =   $SalesQuoteOrder;
         $this->StaffRepository      =   $Staff;
         $this->SystemSettingRepository = $SystemSetting;
@@ -179,10 +181,10 @@ class OrderService extends QuoteOrderItemService
     }
 
     public function select($where = []) {
-        return $this->SalesOrderRepository->select(['id', 'name', 'no'])->where($where)->get()->map(function($item) {
+        return $this->SalesOrderRepository->select(['id', 'project_managements_id', 'no'])->with('project')->where($where)->get()->map(function($item) {
             return [
                 'value' =>  $item->id,
-                'name'  =>  "{$item->name} ({$item->no})"
+                'name'  =>  "{$item->project?->name} ({$item->no})"
             ];
         })->toArray();
     }
@@ -197,14 +199,10 @@ class OrderService extends QuoteOrderItemService
                     $item['file'] = $item['file']->storeAs('sales_order_item', date('YmdHis')."-".$item['file']->getClientOriginalName() , 'public');
                 }
 
-                if(!$item['sales_order_items_id']) {
-                    $product = $ProductService->getProduct($item['products_id']);
-                    $item['name']       = $product->product_name;
-                    $item['standard']   = $product->product_standard;
-                    $item['size']       = $product->size;
-                    $order_item = SalesOrderItem::create($item);
-                    $item['sales_order_items_id'] = $order_item->id;
-                }
+                $product = $ProductService->getProduct($item['products_id']);
+                $item['name']       = $product->product_name;
+                $item['standard']   = $product->product_standard;
+                $item['size']       = $product->size;
 
                 if(isset($item['id'])) {
                     $search = $model->{$key}()->where([

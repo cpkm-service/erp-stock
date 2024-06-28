@@ -4,7 +4,6 @@ namespace Cpkm\ErpStock\Http\Controllers\Backend\Sales;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Service\Sales\SoldOrderService;
 use App\Service\StaffService;
 use App\Service\CustomerService;
 use App\Service\DepartmentService;
@@ -33,16 +32,16 @@ class SoldReturnOrderController extends Controller
         public CompanyService $CompanyService,
         public CurrencyService $CurrencyService,
         public SystemSettingsService $SystemSettingsService,
-        public SoldOrderService $SoldOrderService,
         public DepotService $DepotService,
     ) {
         $this->form = config('erp-stock.sales_sold_return_orders.form');
         $this->fields = config('erp-stock.sales_sold_return_orders.form.fields');
-        $this->SoldReturnOrderService = config('erp-stock.sales_sold_return_orders.service');
+        $this->SoldReturnOrderService = app(config('erp-stock.sales_sold_return_orders.service'));
+        $this->SoldOrderService = app(config('erp-stock.sales_sold_orders.service'));
         $this->init();
         $this->fields['sourceable_type']['options'] = [
             [
-                'value' =>  \App\Models\SalesSoldOrder::class,
+                'value' =>  \Cpkm\ErpStock\Models\Sales\SoldOrder::class,
                 'name'  =>  '銷貨單',
             ]
         ];
@@ -85,40 +84,37 @@ class SoldReturnOrderController extends Controller
     public function formDataHandle($detail) {
         foreach($detail as $field => $value) {
             if(in_array($field, ['items'])) {
-                foreach ($this->form['fields'][$field] as $key => $item) {
-                    if(isset($this->form['fields'][$field][$key])) {
+                foreach ($this->fields[$field]['parameters'] as $key => $item) {
+                    if(isset($this->fields[$item['field']])) {
                         if($this->show) {
-                            $this->form['fields'][$field][$key]['disabled']  =   true;
+                            $this->fields[$item['field']]['disabled']  =   true;
                         }
                     }
                 }
-            }else if($field == 'sourceable'){
-                $this->form['fields']['sourceable_id']['options']  =   $this->SoldOrderService->select();
-                switch ($detail['sourceable_type']) {
-                    case \App\Models\SubscriptionOrder::class:
-                        break;
-                }
-                // $this->form['fields']['sourceable_type']['value']  =   $source_name;
-                $this->form['fields']['sourceable_id']['disabled']  =   true;
-                $this->form['fields']['sourceable_type']['disabled']  =   true;
-            }else if($field == 'customers_id'){
-                $this->form['fields'][$field]['value']  =   $value;
                 if($this->show) {
-                    $this->form['fields'][$field]['disabled']  =   true;
+                    $this->fields[$field]['disabled']  =   true;
+                }
+                $this->fields[$field]['value']  =   $value;
+            }else if($field == 'sourceable'){
+                $this->fields['sourceable_id']['options'] = $this->SoldOrderService->select();
+                $this->fields['sourceable_type']['disabled'] = true;
+                $this->fields['sourceable_id']['disabled'] = true;
+            }else if($field == 'customers_id'){
+                $this->fields[$field]['value']  =   $value;
+                if($this->show) {
+                    $this->fields[$field]['disabled']  =   true;
                 }
                 $customer = $this->CustomerService->getCustomer($value);
-                $this->form['fields']['customer_contacts_id']['options'] =  $customer?->customer_contacts->map(function($item){
+                $this->fields['customer_contacts_id']['options'] =  $customer->customer_contacts->map(function($item){
                     return [
                         'value' =>  $item->id,
                         'name'  =>  $item->name,
                     ];
-                })->toArray()??[];
-            }else if(in_array($field, ['contact'])){
-                $this->form['fields']['phone']['value'] = $value['mobile']??'';
-            }else if(isset($this->form['fields'][$field])) {
-                $this->form['fields'][$field]['value']  =   $value;
+                })->toArray();
+            }else if(isset($this->fields[$field])) {
+                $this->fields[$field]['value']  =   $value;
                 if($this->show) {
-                    $this->form['fields'][$field]['disabled']  =   true;
+                    $this->fields[$field]['disabled']  =   true;
                 }
             }
         }
@@ -158,9 +154,12 @@ class SoldReturnOrderController extends Controller
         $this->show = true;
         $this->formDataHandle($data['detail']->toArray());
         $data['form']   =   $this->form;
-        $data['table']  =   'sales_orders';
+        $data['table']  =   'sales_sold_return_orders';
         $data['show']   =   $this->show;
-        return view('backend.sales.sold_return_order.form',$data);
+        $data['tax_percentage'] =   $this->SystemSettingsService->getSetting('tax_percentage')??0;
+        $data['decimal_point'] =   $this->SystemSettingsService->getSetting('decimal_point')??0;
+        \View::share('fields',$this->fields);
+        return view('erp-stock::backend.sales.sold_return_order.form',$data);
     }
 
     /**
@@ -176,7 +175,8 @@ class SoldReturnOrderController extends Controller
         $data['form']   =   $this->form;
         $data['tax_percentage'] =   $this->SystemSettingsService->getSetting('tax_percentage')??0;
         $data['decimal_point'] =   $this->SystemSettingsService->getSetting('decimal_point')??0;
-        return view('backend.sales.sold_return_order.form',$data);
+        \View::share('fields',$this->fields);
+        return view('erp-stock::backend.sales.sold_return_order.form',$data);
     }
 
     /**

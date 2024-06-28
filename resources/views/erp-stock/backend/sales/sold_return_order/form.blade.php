@@ -76,9 +76,9 @@
                             // 可以將其用於你的程式邏輯中
                         });
                 }
-                // $(`select[name="projects_id"]`).val(result.data.projects_id).trigger('change');
+                $(`select[name="project_managements_id"]`).val(result.data.project_managements_id).trigger('change');
                 $(`select[name="customers_id"]`).attr('transfer', true).val(result.data.customers_id).trigger('change').attr('transfer', false);
-                $(`select[name="staff_id"]`).val(result.data.customer_staff_id).trigger('change');
+                $(`select[name="staff_id"]`).val(result.data.staff_id).trigger('change');
                 $(`input[name="delivery_date"]`).val(result.data.delivery_date);
                 setTimeout(function() {
                     $(`select[name="currencies_id"]`).val(result.data.currencies_id).trigger('change');
@@ -86,7 +86,6 @@
                     $(`input[name="invoice_methods_id"][value="${result.data.invoice_methods_id}"]`).prop("checked", true).trigger("change");
                     $(`input[name="invoice_categories_id"][value="${result.data.invoice_categories_id}"]`).prop("checked", true).trigger("change");                
                 }, 500);
-                $(`textarea[name="remark"]`).val(result.data.remark);
                 $(`textarea[name="remark"]`).text(result.data.remark)
                 result.data.items.map((item, key) => {
                     let i = key + 1;
@@ -150,8 +149,8 @@
         });
         @endif
     @endif
-    @if(request()->sourceable_id)
-        $(`select[name="sourceable_id"]`).val('{{addslashes(request()->sourceable_id)}}').trigger('change');
+    @if(request()->sourceable_type)
+    $(`select[name="sourceable_type"]`).val('{{addslashes(request()->sourceable_type)}}').trigger('change');
     @endif
 
 </script>

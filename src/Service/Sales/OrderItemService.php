@@ -110,9 +110,10 @@ class OrderItemService
         }
         $key = 'items';
         $all_data = $model->{$key}->pluck('id')->toArray();
+        
         if($data[$key]??false) {
             foreach ($data[$key] as $sort => $item) {
-                if($item['type'] == 2) {
+                if($item['type']??false == 2) {
                     $product = $ProductService->index(['product_serial' => $item['product_number']], false)->first();
                     if(!$product) {
                         $product = $ProductService->store([
@@ -130,7 +131,6 @@ class OrderItemService
                     $item['standard']   = $product->product_standard;
                     $item['size']       = $product->size;
                 }
-                
                 if(isset($item['file']) && $item['file'] && $item['file'] instanceof \Illuminate\Http\UploadedFile) {
                     $item['file'] = $item['file']->storeAs($this->items_folder, date('YmdHis')."-".$item['file']->getClientOriginalName() , 'public');
                 }
@@ -228,6 +228,7 @@ class OrderItemService
         // $main_currency = $this->SystemSettingRepository->getSetting('main_currency');
         $currency = \App\Models\Currency::find($data['currencies_id']);
         $exchange = $currency?->exchange??0;
+        $data['exchange'] = $exchange;
         foreach ($data['items'] as $key => $item) {
             $amount = (float)bcmul($item['count'], $item['unit_amount'] , $decimal_point);
             $tax = (float)bcmul($amount, ($tax_percentage / 100), $decimal_point);

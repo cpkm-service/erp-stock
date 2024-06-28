@@ -92,7 +92,7 @@
                 title: "{{__('erp-stock::backend.sales_sold_return_orders.no')}}"
             },
             {
-                data: "name",
+                data: "project.name",
                 className: "text-md-center",
                 title: "{{__('erp-stock::backend.sales_sold_return_orders.name')}}"
             },
@@ -141,8 +141,8 @@
         function(){
         },
         {
-            ordering:false,
-            order:[[0,'asc']]
+            ordering:true,
+            order:[[2,'desc']]
         }
     );
     $('form[name="search"]').submit(function(){

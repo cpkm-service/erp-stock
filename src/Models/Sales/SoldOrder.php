@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SoldOrder extends Model
 {
-    use HasFactory, \App\Traits\ObserverTrait, \App\Traits\QueryTrait;
+    protected $table = 'sales_sold_orders';
+
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
         'date',
@@ -39,6 +41,7 @@ class SoldOrder extends Model
         'customer_staff_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     protected $casts = [
@@ -76,6 +79,7 @@ class SoldOrder extends Model
             'customer_staff_id',
             'customer_address',
             'customer_phone',
+            'project_managements_id',
         ],
     ];
 
@@ -90,7 +94,6 @@ class SoldOrder extends Model
         'companies_id',
         'customers_id',
         'customer_contacts_id',
-        'name',
         'delivery_date',
         'invoice_types_id',
         'invoice_methods_id',
@@ -111,9 +114,9 @@ class SoldOrder extends Model
         'sourceable_id',
         'sourceable_type',
         'sales_sold_order_statuses_id',
-        'customer_staff_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     public $withs = [
@@ -124,11 +127,17 @@ class SoldOrder extends Model
         'contact',
         'sourceable',
         'status',
+        'project',
     ];
 
     public function items()
     {
-        return $this->morphMany(SalesSoldOrderItem::class, 'sourceable')->with(['sales_purchase_order_item']);
+        return $this->morphMany(SoldOrderItem::class, 'sourceable');
+    }
+
+    public function project()
+    {
+        return $this->hasOne(\App\Models\ProjectManagement::class, 'id', 'project_managements_id');
     }
 
     /**
@@ -137,7 +146,7 @@ class SoldOrder extends Model
      * @return void
      */
     public function staff() {
-        return $this->hasOne(Staff::class, 'id', 'staff_id');
+        return $this->hasOne(\App\Models\Staff::class, 'id', 'staff_id');
     }
     
     /**
@@ -146,7 +155,7 @@ class SoldOrder extends Model
      * @return void
      */
     public function customer() {
-        return $this->hasOne(Customer::class, 'id', 'customers_id');
+        return $this->hasOne(\App\Models\Customer::class, 'id', 'customers_id');
     }
     
     /**
@@ -155,11 +164,11 @@ class SoldOrder extends Model
      * @return void
      */
     public function department() {
-        return $this->hasOne(Department::class, 'id', 'departments_id');
+        return $this->hasOne(\App\Models\Department::class, 'id', 'departments_id');
     }
 
     public function contact() {
-        return $this->hasOne(CustomerContact::class, 'id', 'customer_contacts_id');
+        return $this->hasOne(\App\Models\CustomerContact::class, 'id', 'customer_contacts_id');
     }
 
     public function sourceable() {
@@ -167,7 +176,11 @@ class SoldOrder extends Model
     }
 
     public function status() {
-        return $this->hasOne(SalesSoldOrderStatus::class, 'id', 'sales_sold_order_statuses_id');
+        return $this->hasOne(SoldOrderStatus::class, 'id', 'sales_sold_order_statuses_id');
+    }
+
+    public function sold_return_order() {
+        return $this->morphMany(SoldReturnOrder::class, 'sourceable');
     }
 
     public function getCloseAttribute() {

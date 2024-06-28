@@ -45,6 +45,7 @@ class SoldReturnOrderService extends OrderItemService
     **/
     protected $SystemSettingRepository;
     
+    protected $items_folder = 'sales_sold_return_order_items';
     /** 
      * 建構子
      * @version 1.0
@@ -82,7 +83,7 @@ class SoldReturnOrderService extends OrderItemService
 
     public function makeNo($date) {
         $no = (new \Carbon\Carbon($date))->format('Ymd');
-        $maxNo = SalesSoldReturnOrder::where('no', 'like', $no . "%")->max('no');
+        $maxNo = $this->SalesSoldReturnOrderRepository->where('no', 'like', $no . "%")->max('no');
     
         if ($maxNo) {
             $maxSequence = intval(substr($maxNo, -4));
@@ -150,7 +151,7 @@ class SoldReturnOrderService extends OrderItemService
         return \DB::transaction(function() use ($data, $id){
             $data = $this->calculateAmount($this->dataHandle($data));
             $updateData = Arr::only($data, $this->SalesSoldReturnOrderRepository->getDetailFields());
-            $updataData['departments_id']   =   empty($data['customer_staff_id']) ? NULL : $this->getDepartmentId($data['customer_staff_id']);
+            $updateData['departments_id']   =   empty($data['customer_staff_id']) ? NULL : $this->getDepartmentId($data['customer_staff_id']);
             $model =  $this->getSalesSoldReturnOrder($id);
             $result = $model->update($updateData);
             if(!$result){
@@ -196,95 +197,11 @@ class SoldReturnOrderService extends OrderItemService
             $data['customer_address']   =   NULL;
             $data['customer_phone']     =   NULL;
         }        
-        $data['departments_id']   =   empty($data['customer_staff_id']) ? NULL : $this->getDepartmentId($data['customer_staff_id']);
+        $data['departments_id']   =   $this->getDepartmentId($data['staff_id']);
         if(isset($data['file']) && $data['file'] && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
             $data['file'] = $data['file']->storeAs('sales_sold_return_order', date('YmdHis')."-".$data['file']->getClientOriginalName() , 'public');
         }
         return $data;
-    }
-
-    public function setItems($model, $data) {
-        $ProductService = app(ProductService::class);
-        $key = 'items';
-        $all_data = $model->{$key}->pluck('id')->toArray();
-        
-        if($data[$key]??false) {
-            foreach ($data[$key] as $sort => $item) {
-                if(isset($item['file']) && $item['file'] && $item['file'] instanceof \Illuminate\Http\UploadedFile) {
-                    $item['file'] = $item['file']->storeAs('sales_sold_return_order_item', date('YmdHis')."-".$item['file']->getClientOriginalName() , 'public');
-                }
-                
-                if(!$item['sales_sold_order_items_id']) {
-                    $product = $ProductService->getProduct($item['products_id']);
-                    $item['name']       = $product->name;
-                    $item['standard']   = $product->product_standard;
-                    $item['unit']       = $product->unit;
-                    $item['transfer_unit']  =   $product->transfer_unit;
-                    $item['transfer_count']  =   $product->transfer_count;
-                    $purchase_order_item = \App\Models\SalesPurchaseOrderItem::create($item);
-                    if(!$purchase_order_item) {
-                        throw new ErrorException(__('backend.errors.insertFail'), 500);
-                    }
-                    $item['sales_purchase_order_items_id'] = $purchase_order_item->id;
-                    $sold_order_item = \App\Models\SalesSoldOrderItem::create($item);
-                    if(!$sold_order_item) {
-                        throw new ErrorException(__('backend.errors.insertFail'), 500);
-                    }
-                    $item['sales_sold_order_items_id'] = $sold_order_item->id;
-                }
-
-                $search = null;
-                if(isset($item['id']) && !empty($item['id'])) {
-                    $search = $model->{$key}()->where(['id' => $item['id']])->first();
-                }
-
-                if ($search) {
-                    $item['sales_purchase_order_items_id'] = $search->sales_sold_order_items_id;
-                    $search->update($item);
-                    if (!empty($search->sales_sold_order_items_id)) {
-                        \App\Models\SalesSoldOrderItem::where('id', $search->sales_sold_order_items_id)
-                            ->update([
-                                'count' => $item['count'],
-                                'amount' => $item['amount'],
-                                'tax' => $item['tax'],
-                                'total_amount' => $item['total_amount'],
-                                'remark' => $item['remark'],
-                                'main_amount' => $item['main_amount'],
-                                'main_tax' => $item['main_tax'],
-                                'main_total_amount' => $item['main_total_amount'],
-                            ]);
-                    }
-
-                    $sales_purchase_order_item = \App\Models\SalesSoldOrderItem::where('id', $search->sales_sold_order_items_id)->first();
-                    if (!empty($sales_purchase_order_item->sales_purchase_order_items_id)) {
-                        \App\Models\SalesPurchaseOrderItem::where('id', $sales_purchase_order_item->sales_purchase_order_items_id)
-                            ->update([
-                                'unit_amount' => $item['unit_amount'],
-                                'count' => $item['count'],
-                                'amount' => $item['amount'],
-                                'tax' => $item['tax'],
-                                'total_amount' => $item['total_amount'],
-                                'delivery_date' => $item['delivery_date'],
-                                'description' => $item['description'],
-                                'remark' => $item['remark'],
-                                'main_amount' => $item['main_amount'],
-                                'main_tax' => $item['main_tax'],
-                                'main_total_amount' => $item['main_total_amount'],
-                            ]);
-                    }
-
-                    unset($all_data[array_search($item['id'], $all_data)]);
-                } else {
-                    $newItem = $model->{$key}()->create($item);
-                    $item['id'] = $newItem->id;
-                }
-            }
-        }
-        foreach ($all_data as $id) {
-            $model->{$key}()->where([
-                'id' => $id,
-            ])->delete();
-        }
     }
 
     public function close($id) {

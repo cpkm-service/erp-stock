@@ -41,6 +41,7 @@ class SoldReturnOrder extends Model
         'customer_staff_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     protected $casts = [
@@ -78,6 +79,7 @@ class SoldReturnOrder extends Model
             'customer_staff_id',
             'customer_address',
             'customer_phone',
+            'project_managements_id',
         ],
     ];
 
@@ -116,6 +118,7 @@ class SoldReturnOrder extends Model
         'customer_staff_id',
         'customer_address',
         'customer_phone',
+        'project_managements_id',
     ];
 
     public $withs = [
@@ -127,13 +130,16 @@ class SoldReturnOrder extends Model
         'sourceable',
         'status',
         'customer_staff',
+        'project',
     ];
 
     public function items()
     {
-        return $this->morphMany(SalesSoldReturnOrderItem::class, 'sourceable')->with(['sales_sold_order_item' => function($query) {
-            $query->with(['sales_purchase_order_item']);
-        }]);
+        return $this->morphMany(SoldReturnOrderItem::class, 'sourceable');
+    }
+
+    public function project() {
+        return $this->hasOne(\App\Models\ProjectManagement::class, 'id', 'project_managements_id');
     }
 
     /**
@@ -142,11 +148,11 @@ class SoldReturnOrder extends Model
      * @return void
      */
     public function staff() {
-        return $this->hasOne(Staff::class, 'id', 'staff_id');
+        return $this->hasOne(\App\Models\Staff::class, 'id', 'staff_id');
     }
 
     public function customer_staff() {
-        return $this->hasOne(Staff::class, 'id', 'customer_staff_id');
+        return $this->hasOne(\App\Models\Staff::class, 'id', 'customer_staff_id');
     }
     
     /**
@@ -155,7 +161,7 @@ class SoldReturnOrder extends Model
      * @return void
      */
     public function customer() {
-        return $this->hasOne(Customer::class, 'id', 'customers_id');
+        return $this->hasOne(\App\Models\Customer::class, 'id', 'customers_id');
     }
     
     /**
@@ -164,11 +170,11 @@ class SoldReturnOrder extends Model
      * @return void
      */
     public function department() {
-        return $this->hasOne(Department::class, 'id', 'departments_id');
+        return $this->hasOne(\App\Models\Department::class, 'id', 'departments_id');
     }
 
     public function contact() {
-        return $this->hasOne(CustomerContact::class, 'id', 'customer_contacts_id');
+        return $this->hasOne(\App\Models\CustomerContact::class, 'id', 'customer_contacts_id');
     }
 
     public function sourceable() {
@@ -176,7 +182,7 @@ class SoldReturnOrder extends Model
     }
 
     public function status() {
-        return $this->hasOne(SalesSoldReturnOrderStatus::class, 'id', 'sales_sold_return_order_statuses_id');
+        return $this->hasOne(SoldReturnOrderStatus::class, 'id', 'sales_sold_return_order_statuses_id');
     }
 
     public function getCloseAttribute() {

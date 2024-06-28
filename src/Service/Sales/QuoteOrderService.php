@@ -9,7 +9,6 @@ use DataTables;
 use App\Service\ProductService;
 use App\Models\ReviewSetting;
 use App\Models\SystemSetting;
-use App\Models\Currency;
 
 /**
  * Class QuoteOrderService.
@@ -159,10 +158,10 @@ class QuoteOrderService extends OrderItemService
     }
 
     public function select($where = []) {
-        return $this->SalesQuoteOrderRepository->select(['id', 'name', 'no'])->where($where)->get()->map(function($item) {
+        return $this->SalesQuoteOrderRepository->select(['id', 'no', 'project_managements_id'])->with(['project'])->where($where)->get()->map(function($item) {
             return [
                 'value' =>  $item->id,
-                'name'  =>  "{$item->name} ({$item->no})"
+                'name'  =>  "{$item->project?->name} ({$item->no})"
             ];
         })->toArray();
     }

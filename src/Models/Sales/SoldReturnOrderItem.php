@@ -1,6 +1,6 @@
 <?php
 
-namespace Cpkm\ErpStock\Models;
+namespace Cpkm\ErpStock\Models\Sales;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,46 +12,82 @@ class SoldReturnOrderItem extends Model
     use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
+        'type',
+        'products_id',
         'count',
+        'unit',
         'remark',
-        'sales_sold_order_items_id',
-        'main_amount',
-        'main_tax',
-        'main_total_amount',
+        'description',
         'amount',
         'tax',
         'total_amount',
+        'file',
+        'main_amount',
+        'main_tax',
+        'main_total_amount',
+        'unit_amount',
+        'file',
+        'name',
+        'standard',
+        'size',
+        'delivery_date',
+        'quote_count',
+        'sales_sold_order_items_id',
     ];
 
     public static $audit = [
-        'table' => SalesSoldOrder::class,
+        'table' => SoldReturnOrder::class,
         //改存欄位 預設id
         'table_id' => 'sourceable_id',
 
         'only' => [
+            'type',
+            'products_id',
             'count',
+            'unit',
             'remark',
-            'sales_sold_order_items_id',
+            'description',
             'amount',
             'tax',
             'total_amount',
+            'file',
             'main_amount',
             'main_tax',
             'main_total_amount',
+            'unit_amount',
+            'file',
+            'name',
+            'standard',
+            'size',
+            'delivery_date',
+            'quote_count',
+            'sales_sold_order_items_id',
         ],
     ];
 
     public $detail = [
         'id',
+        'type',
+        'products_id',
         'count',
+        'unit',
         'remark',
-        'sales_sold_order_items_id',
+        'description',
         'amount',
         'tax',
         'total_amount',
+        'file',
         'main_amount',
         'main_tax',
         'main_total_amount',
+        'unit_amount',
+        'file',
+        'name',
+        'standard',
+        'size',
+        'delivery_date',
+        'quote_count',
+        'sales_sold_order_items_id',
     ];
 
     protected $casts = [
@@ -62,6 +98,6 @@ class SoldReturnOrderItem extends Model
     }
 
     public function sales_sold_order_item() {
-        return $this->belongsTo(SalesSoldOrderItem::class, 'sales_sold_order_items_id');
+        return $this->belongsTo(SoldOrderItem::class, 'sales_sold_order_items_id');
     }
 }
