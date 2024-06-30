@@ -181,7 +181,14 @@ class QuoteOrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $this->QuoteOrderService->update($request->all(),$id);
+        if($request->action == 'close') {
+            \DB::transaction(function() use ($id) {
+                $this->QuoteOrderService->close($id);
+            });
+            return response()->json(['message' => __('update').__('success')]);
+        }else{
+            $this->QuoteOrderService->update($request->all(),$id);
+        }
         return redirect()->route('backend.sales.quote_order.index');
     }
 

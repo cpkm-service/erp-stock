@@ -54,10 +54,9 @@
                                             <th class="text-center">{{__('erp-stock::backend.sales_quote_orders.sales_quote_order_items.*.unit')}}</th>
                                             <th class="text-center">{{__('erp-stock::backend.sales_orders.date')}}</th>
                                             <th class="text-center">{{__('erp-stock::backend.sales_orders.no')}}</th>
-                                            <th class="text-center">{{__('erp-stock::backend.sales_sold_orders.id')}}</th>
                                             <th class="text-center">{{__('erp-stock::backend.sales_orders.sales_order_items.*.count')}}</th>
-                                            <th class="text-center">已銷數量</th>
-                                            <th class="text-center">未銷數量</th>
+                                            <th class="text-center">已訂數量</th>
+                                            <th class="text-center">未訂數量</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -81,7 +80,6 @@
                                             <th class="text-center">{{($item->unit)}}</th>
                                             <th class="text-center">{{($sales_order_item->sourceable->date)}}</th>
                                             <th class="text-center">{{($sales_order_item->sourceable->no)}}</th>
-                                            <th class="text-center">{{($sales_order_item->sourceable->id)}}</th>
                                             <th class="text-center">{{number_format($sales_order_item->count)}}</th>
                                             <th class="text-center">{{number_format($already_count)}}</th>
                                             <th class="text-center">{{number_format($all_count)}}</th>

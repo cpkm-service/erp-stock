@@ -2,13 +2,9 @@
 
 namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\Staff;
 use Illuminate\Support\Arr;
 use App\Exceptions\ErrorException;
 use DataTables;
-use App\Service\ProductService;
-use App\Models\ReviewSetting;
-use App\Models\SystemSetting;
 
 /**
  * Class QuoteOrderService.
@@ -37,10 +33,10 @@ class QuoteOrderService extends OrderItemService
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(Staff $Staff, SystemSetting $SystemSetting) {
+    public function __construct() {
         $this->SalesQuoteOrderRepository      =   app(config('erp-stock.sales_quote_orders.model'));
-        $this->StaffRepository      =   $Staff;
-        $this->SystemSettingRepository = $SystemSetting;
+        $this->StaffRepository      =   app(config('erp-stock.sales_quote_orders.models.staff'));
+        $this->SystemSettingRepository = app(\App\Models\SystemSetting::class);
     }
 
     /**
@@ -71,7 +67,7 @@ class QuoteOrderService extends OrderItemService
     }
 
     public function getDepartmentId($staff_id) {
-        $staff = Staff::where('id', $staff_id)->first();
+        $staff = $this->StaffRepository->where('id', $staff_id)->first();
         return $staff->department_id;
     }
 
@@ -165,6 +161,22 @@ class QuoteOrderService extends OrderItemService
                 'name'  =>  "{$item->project?->name} ({$item->no})"
             ];
         })->toArray();
+    }
+
+    public function close($id) {
+        return \DB::transaction(function() use($id) {
+            $model =  $this->getSalesQuoteOrder($id);
+            if($model->sales_quote_order_statuses_id != 1) {
+                $updateData['sales_quote_order_statuses_id'] = 1;
+            }else{
+                $updateData['sales_quote_order_statuses_id'] = 2;
+            }
+            $result = $model->update($updateData);
+            if(!$result){
+                throw new ErrorException(__('backend.errors.updateFail'), 500);
+            }
+            return $model;
+        });
     }
 
 }

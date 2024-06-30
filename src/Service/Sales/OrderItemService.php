@@ -2,104 +2,20 @@
 
 namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\SalesOrderItem;
-use App\Exceptions\ErrorException;
-
 /**
  * Class OrderItemService.
  */
 class OrderItemService
 {
-    /** 
-     * @access protected
-     * @var SalesOrderItemRepository
-     * @version 1.0
-     * @author Henry
-    **/
-    protected $SalesOrderItemRepository;
-    
-    /** 
-     * 建構子
-     * @version 1.0
-     * @author Henry
-    **/
-    public function __construct(SalesOrderItem $SalesOrderItem) {
-        $this->SalesOrderItemRepository      =   $SalesOrderItem;
-    }
-
-    /**
-     * 報價單列表
-     * @param array $data
-     * @version 1.0
-     * @author Henry
-     * @return \DataTables
-     */
-    public function index($data) {
-        $where = Arr::only($data,["name","status"]);
-        return DataTables::of($this->SalesOrderItemRepository->listQuery($where))->make();
-    }
-
-    public function getSalesOrderItem($id) {
-        return $this->SalesOrderItemRepository->getDetail($id);
-    }
-
-    /**
-     * 產生單據號
-     *
-     * @return void
-     */
-    public function makeNo($date) {
-        $no = (new \Carbon\Carbon($date))->format('Ymd');
-        $count = SalesOrderItem::where('no', 'like', $no."%")->count() + 1;
-        return $no.str_pad($count, 4, "0", STR_PAD_LEFT);
-    }
-
-    public function getDepartmentId($staff_id) {
-        $staff = Staff::where('id', $staff_id)->first();
-        return $staff->department_id;
-    }
-
-    /**
-     * 建立報價單
-     * @param array $data
-     * @return object $model
-     * @throws \App\Exceptions\Universal\ErrorException
-     * @version 1.0
-     * @author Henry
-     */
-    public function store(array $data) {
-        return \DB::transaction(function() use ($data){
-            $quote_order = $this->SalesQuoteOrderRepository->where([
-                'no'    => $data['source_no'],
-                'status'    =>  0,
-            ])->first();
-            if(!$quote_order) {
-                throw new ErrorException(__('backend.errors.insertFail'), 500);
-            }
-            $data = $this->dataHandle($data);
-            $createData =  Arr::only($data, $this->SalesOrderItemRepository->getDetailFields());
-            $createData['no']   =   $this->makeNo($createData['date']);
-            $createData['departments_id']   =   $this->getDepartmentId($data['staff_id']);
-            if(!isset($createData['file'])) {
-                $createData['file'] = $quote_order->file;
-            }
-            $model     =   $quote_order->order()->create($createData);
-            if(!$model){
-                throw new ErrorException(__('backend.errors.insertFail'), 500);
-            }
-            $this->setItems($model, $data);
-            $quote_order->update([
-                'status'    =>  1,
-            ]);
-            return $model;
-        });
-    }
-
     protected $stock_type;
 
     protected $stock_expected;
     
-        
+    public function getSalesOrderItem($id) {
+        $this->SalesOrderItemRepository = app(\Cpkm\ErpStock\Models\Sales\OrderItem::class);
+        return $this->SalesOrderItemRepository->getDetail($id);
+    }
+    
     /**
      * 設定項目
      *
@@ -164,59 +80,6 @@ class OrderItemService
                 'id' => $id,
             ])->delete();
         }
-    }
-
-    /**
-     * 更新訂購參數資料
-     * @param array $updateData
-     * @param string $id
-     * @return object $model
-     * @throws \App\Exceptions\Universal\ErrorException
-     * @version 1.0
-     * @author Henry
-     */
-    public function update(array $data, string $id) {
-        return \DB::transaction(function() use ($data, $id){
-            $data = $this->dataHandle($data);
-            $updateData = Arr::only($data, $this->SalesOrderItemRepository->getDetailFields());
-            $model =  $this->getSalesOrderItem($id);
-            $result = $model->update($updateData);
-            if(!$result){
-                throw new ErrorException(__('backend.errors.updateFail'), 500);
-            }
-            $this->setItems($model, $data);
-            return $model;
-        });
-    }
-
-    /**
-     * 刪除訂購參數資料
-     * @param string $id
-     * @return object $model
-     * @throws \App\Exceptions\Universal\ErrorException
-     * @version 1.0
-     * @author Henry
-     */
-    public function delete(string $id) {
-        $model =  $this->getSalesOrderItem($id);
-        $model->delete();
-        if(!$model){
-            throw new ErrorException(__('backend.errors.deleteFail'), 500);
-        }
-        return $model;
-    }
-    
-    /**
-     * 資料處理
-     *
-     * @param  mixed $data
-     * @return void
-     */
-    public function dataHandle($data) {
-        if(isset($data['file']) && $data['file']) {
-            $data['file'] = $data['file']->storeAs('sales_quote_order', date('YmdHis')."-".$data['file']->getClientOriginalName() , 'public');
-        }
-        return $this->calculateAmount($data);
     }
 
     /**

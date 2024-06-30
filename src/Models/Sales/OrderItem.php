@@ -44,7 +44,7 @@ class OrderItem extends Model
     ];
 
     public static $audit = [
-        'table' => SalesOrder::class,
+        'table' => Order::class,
         //改存欄位 預設id
         'table_id' => 'sourceable_id',
 

@@ -2,34 +2,15 @@
 
 namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\SalesQuoteOrder;
-use App\Models\SalesQuoteOrderItem;
-use App\Models\Staff;
 use Illuminate\Support\Arr;
 use App\Exceptions\ErrorException;
 use DataTables;
-use App\Service\ProductService;
-use App\Models\SystemSetting;
 
 /**
  * Class SoldOrderService.
  */
 class SoldOrderService extends OrderItemService
 {
-    /** 
-     * @access protected
-     * @var SalesSoldOrderRepository
-     * @version 1.0
-     * @author Henry
-    **/
-    protected $SalesSoldOrderRepository;
-    /** 
-     * @access protected
-     * @var SalesQuoteOrderRepository
-     * @version 1.0
-     * @author Henry
-    **/
-    protected $SalesQuoteOrderRepository;
     /** 
      * @access protected
      * @var StaffRepository
@@ -55,12 +36,10 @@ class SoldOrderService extends OrderItemService
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
+    public function __construct() {
         $this->SalesSoldOrderRepository      =   app(config('erp-stock.sales_sold_orders.model'));
-        $this->SalesQuoteOrderRepository      =   $SalesQuoteOrder;
-        $this->StaffRepository      =   $Staff;
-        $this->SystemSettingRepository = $SystemSetting;
-        $this->SalesQuoteOrderItemRepository = $SalesQuoteOrderItem;
+        $this->StaffRepository      =   app(config('erp-stock.sales_sold_orders.models.staff'));
+        $this->SystemSettingRepository = app(\App\Models\SystemSetting::class);
     }
 
     /**
@@ -91,7 +70,7 @@ class SoldOrderService extends OrderItemService
     }
 
     public function getDepartmentId($staff_id) {
-        $staff = Staff::where('id', $staff_id)->first();
+        $staff = $this->StaffRepository->where('id', $staff_id)->first();
         return $staff->department_id;
     }
 

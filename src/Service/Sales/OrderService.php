@@ -2,16 +2,9 @@
 
 namespace Cpkm\ErpStock\Service\Sales;
 
-use App\Models\SalesOrder;
-use App\Models\SalesQuoteOrder;
-use App\Models\SalesQuoteOrderItem;
-use App\Models\Staff;
 use Illuminate\Support\Arr;
 use App\Exceptions\ErrorException;
 use DataTables;
-use App\Models\SystemSetting;
-use App\Models\SalesOrderItem;
-use App\Service\ProductService;
 
 /**
  * Class OrderService.
@@ -25,13 +18,6 @@ class OrderService extends OrderItemService
      * @author Henry
     **/
     protected $SalesOrderRepository;
-    /** 
-     * @access protected
-     * @var SalesQuoteOrderRepository
-     * @version 1.0
-     * @author Henry
-    **/
-    protected $SalesQuoteOrderRepository;
     /** 
      * @access protected
      * @var StaffRepository
@@ -58,12 +44,10 @@ class OrderService extends OrderItemService
      * @version 1.0
      * @author Henry
     **/
-    public function __construct(Staff $Staff, SystemSetting $SystemSetting, public SalesQuoteOrder $SalesQuoteOrder, SalesQuoteOrderItem $SalesQuoteOrderItem) {
+    public function __construct() {
         $this->SalesOrderRepository      =   app(config('erp-stock.sales_orders.model'));
-        $this->SalesQuoteOrderRepository      =   $SalesQuoteOrder;
-        $this->StaffRepository      =   $Staff;
-        $this->SystemSettingRepository = $SystemSetting;
-        $this->SalesQuoteOrderItemRepository = $SalesQuoteOrderItem;
+        $this->StaffRepository      =   app(config('erp-stock.sales_orders.models.staff'));
+        $this->SystemSettingRepository = app(\App\Models\SystemSetting::class);
     }
 
     /**
@@ -89,12 +73,12 @@ class OrderService extends OrderItemService
      */
     public function makeNo($date) {
         $no = (new \Carbon\Carbon($date))->format('Ymd');
-        $count = SalesOrder::where('no', 'like', $no."%")->count() + 1;
+        $count = $this->SalesOrderRepository->where('no', 'like', $no."%")->count() + 1;
         return $no.str_pad($count, 4, "0", STR_PAD_LEFT);
     }
 
     public function getDepartmentId($staff_id) {
-        $staff = Staff::where('id', $staff_id)->first();
+        $staff = $this->StaffRepository->where('id', $staff_id)->first();
         return $staff->department_id;
     }
 
