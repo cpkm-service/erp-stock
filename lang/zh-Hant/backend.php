@@ -231,7 +231,7 @@ return [
 		'exchange'		=>	'匯率',
 		'make_id'	=>	'製單人員',
 		'remark'			=>	'備註',
-		'sales_quote_order_statuses_id'			=>	'狀態',
+		'sales_sold_order_statuses_id'			=>	'狀態',
 		'items'	=>	'報價單項目',
 		'sales_sold_order_items'	=>	[
 			'*'	=>	[

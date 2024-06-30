@@ -106,6 +106,7 @@
                         $(`input[data-name="items[${i}][unit_amount]"]`).val(item.unit_amount).trigger('keyup');
                         $(`input[data-name="items[${i}][factory_hours]"]`).val(item.factory_hours).trigger('keyup');
                         $(`input[data-name="items[${i}][count]"]`).val(item.count).trigger('keyup');
+                        $(`input[name="items[${i}][sales_sold_order_items_id]"]`).val(item.id);
                         $(`input[name="items[${i}][remark]"]`).val(item.remark);
                         $(`input[name="items[${i}][description]"]`).val(item.description);
                         $(`input[name="items[${i}][file]"]`)

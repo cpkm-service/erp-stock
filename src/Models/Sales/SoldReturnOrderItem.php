@@ -63,7 +63,6 @@ class SoldReturnOrderItem extends Model
             'size',
             'delivery_date',
             'quote_count',
-            'sales_sold_order_items_id',
         ],
         'translation' => [
             'products_id' => [

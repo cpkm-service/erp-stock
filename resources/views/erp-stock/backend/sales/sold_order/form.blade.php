@@ -66,12 +66,12 @@
                                     <tr>
                                         <th class="text-center">{{($key + 1)}}</th>
                                         <th class="text-center">{{($item->id)}}</th>
-                                        <th class="text-center">{{($item->sales_purchase_order_item->product->product_serial)}}</th>
-                                        <th class="text-center">{{($item->sales_purchase_order_item->name)}}</th>
-                                        <th class="text-center">{{($item->sales_purchase_order_item->standard)}}</th>
-                                        <th class="text-center">{{($item->sales_purchase_order_item->size)}}</th>
+                                        <th class="text-center">{{($item->product->product_serial)}}</th>
+                                        <th class="text-center">{{($item->name)}}</th>
+                                        <th class="text-center">{{($item->standard)}}</th>
+                                        <th class="text-center">{{($item->size)}}</th>
                                         <th class="text-center">{{($item->count)}}</th>
-                                        <th class="text-center">{{($item->sales_purchase_order_item->unit)}}</th>
+                                        <th class="text-center">{{($item->unit)}}</th>
                                         <th class="text-center">{{$sales_sold_return_order_item->sourceable->no}}</th>
                                         <th class="text-center">{{$sales_sold_return_order_item->sourceable->id}}</th>
                                         <th class="text-center">{{number_format($sales_sold_return_order_item->count)}}</th>
