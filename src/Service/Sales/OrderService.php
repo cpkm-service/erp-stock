@@ -195,4 +195,17 @@ class OrderService extends OrderItemService
         })->toArray();
     }
 
+    public function close($id) {
+        $model =  $this->getSalesOrder($id);
+        if($model->status->id != 1) {
+            return $model;
+        }
+        $updateData['sales_order_statuses_id'] = 2;
+        $result = $model->update($updateData);
+        if(!$result){
+            throw new ErrorException(__('backend.errors.updateFail'), 500);
+        }
+        return $model;
+    }
+
 }

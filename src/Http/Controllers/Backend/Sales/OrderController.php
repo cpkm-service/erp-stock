@@ -176,7 +176,13 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $this->OrderService->update($request->all(),$id);
+        
+        if($request->action == 'close') {
+            $this->OrderService->close($id);
+            return response()->json(['message' => __('update').__('success')]);
+        }else{
+            $this->OrderService->update($request->all(),$id);
+        }
         return redirect()->route('backend.sales.order.index');
     }
 

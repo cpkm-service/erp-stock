@@ -66,7 +66,7 @@
             {
                 data: "status.name",
                 className: "text-md-center",
-                title: "{{__('erp-stock::backend.sales_sold_orders.sales_quote_order_statuses_id')}}",
+                title: "{{__('erp-stock::backend.sales_sold_orders.sales_sold_order_statuses_id')}}",
                 render:(data,type,row,meta) => {
                     switch (row.status.id) {
                         case 1:

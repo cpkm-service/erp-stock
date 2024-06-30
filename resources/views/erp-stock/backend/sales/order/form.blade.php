@@ -229,7 +229,7 @@
     setMainCurrency(`input[id="number-main_tax"]`,`input[id="number-tax"]`);
     setMainCurrency(`input[id="number-main_total_amount"]`,`input[id="number-total_amount"]`);
     @else
-        @if($detail->sales_quote_order_statuses_id == 1)
+        @if($detail->status->id == 1)
         $('#close').click(function() {
             var id = $(this).data('id');
             console.log(id)

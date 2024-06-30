@@ -1,4 +1,13 @@
 @extends('backend.layouts.main')
+@section('options')
+    @if(($show??false))
+    <div class="row mb-2">
+        <div class="col-12">
+            <button class="btn @if($detail->status->id == 1) btn-warning @elseif($detail->status->id == 2) btn-primary @else btn-danger @endif" type="button" id="close" data-id="{{$detail->id}}">{{$detail->status->name}}</button>
+        </div>
+    </div>
+    @endif
+@endsection
 @section('content')
 <main id="main-container">
 <!-- Page Content -->
@@ -133,7 +142,7 @@
     setMainCurrency(`input[id="number-main_tax"]`,`input[id="number-tax"]`);
     setMainCurrency(`input[id="number-main_total_amount"]`,`input[id="number-total_amount"]`);
     @else
-        @if($detail->subscription_order_statuses_id == 1)
+        @if($detail->status->id == 1)
         $('#close').click(function() {
             var id = $(this).data('id');
             console.log(id)

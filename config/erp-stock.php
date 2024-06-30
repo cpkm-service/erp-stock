@@ -4300,6 +4300,20 @@ return [
                             'class' =>  'row',
                             'col'   =>  [
                                 [
+                                    'class' =>  'col-xl-12',
+                                    'col'   =>  [
+                                        [
+                                            'class' =>  'slots',
+                                            'field' =>  'options',
+                                        ]
+                                    ]
+                                ],
+                            ]
+                        ],
+                        [
+                            'class' =>  'row',
+                            'col'   =>  [
+                                [
                                     'class' =>  'col-12',
                                     'col'   =>  [
                                         [
