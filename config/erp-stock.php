@@ -1206,7 +1206,7 @@ return [
                 ],
                 //幣別
                 'currencies_id'   =>  [
-                    'tag'           =>  'select',
+                    'tag'           =>  'currency-select',
                     'name'          =>  'currencies_id',
                     'text'          =>  'erp-stock::backend.sales_quote_orders.currencies_id',
                     'placeholder'   =>  'erp-stock::backend.sales_quote_orders.currencies_id',
@@ -2286,7 +2286,7 @@ return [
                 ],
                 //幣別
                 'currencies_id'   =>  [
-                    'tag'           =>  'select',
+                    'tag'           =>  'currency-select',
                     'name'          =>  'currencies_id',
                     'text'          =>  'erp-stock::backend.sales_orders.currencies_id',
                     'placeholder'   =>  'erp-stock::backend.sales_orders.currencies_id',
@@ -3425,7 +3425,7 @@ return [
                 ],
                 //幣別
                 'currencies_id'   =>  [
-                    'tag'           =>  'select',
+                    'tag'           =>  'currency-select',
                     'name'          =>  'currencies_id',
                     'text'          =>  'erp-stock::backend.sales_sold_orders.currencies_id',
                     'placeholder'   =>  'erp-stock::backend.sales_sold_orders.currencies_id',
@@ -4565,7 +4565,7 @@ return [
                 ],
                 //幣別
                 'currencies_id'   =>  [
-                    'tag'           =>  'select',
+                    'tag'           =>  'currency-select',
                     'name'          =>  'currencies_id',
                     'text'          =>  'erp-stock::backend.sales_sold_return_orders.currencies_id',
                     'placeholder'   =>  'erp-stock::backend.sales_sold_return_orders.currencies_id',

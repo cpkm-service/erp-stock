@@ -9,6 +9,8 @@ class OrderItem extends Model
 {
     protected $table = 'sales_order_items';
 
+    protected static $prefix = 'erp-stock::';
+
     use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $appends = [
@@ -42,9 +44,9 @@ class OrderItem extends Model
     ];
 
     public static $audit = [
-        // 'table' => SalesQuoteOrder::class,
-        // //改存欄位 預設id
-        // 'table_id' => 'sourceable_id',
+        'table' => SalesOrder::class,
+        //改存欄位 預設id
+        'table_id' => 'sourceable_id',
 
         'only' => [
             'type',
@@ -140,5 +142,9 @@ class OrderItem extends Model
 
     public function getPurchaseStandardAttribute() {
         return route('backend.sales.order_item_standard.create',['item' => $this->id]);
+    }
+
+    public function product_stock_list() {
+        return $this->morphOne(\App\Models\ProductStockList::class, 'sourceable');
     }
 }

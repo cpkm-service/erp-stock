@@ -9,7 +9,9 @@ class SoldReturnOrder extends Model
 {
     protected $table = 'sales_sold_return_orders';
 
-    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
+    protected static $prefix = 'erp-stock::';
+
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait, \Cpkm\ErpStock\Traits\ModelTrait;
 
     protected $fillable = [
         'date',
@@ -80,6 +82,56 @@ class SoldReturnOrder extends Model
             'customer_address',
             'customer_phone',
             'project_managements_id',
+        ],
+        'translation' => [
+            'companies_id'  =>  [
+                'relation'  =>  'company',
+                'format'    =>  '{name}',
+            ],
+            'project_managements_id' => [
+                'relation' => 'project',
+                'format' => '{name}',
+            ],
+            'sales_quote_order_statuses_id' => [
+                'relation' => 'status',
+                'format' => '{name}',
+            ],
+            'departments_id' => [
+                'relation' => 'department',
+                'format' => '{name}',
+            ],
+            'customers_id' => [
+                'relation' => 'customer',
+                'format' => '{name}',
+            ],
+            'customer_contacts_id' => [
+                'relation' => 'contact',
+                'format' => '{name}',
+            ],
+            'staff_id' => [
+                'relation' => 'staff',
+                'format' => '{name}',
+            ],
+            'make_id' => [
+                'relation' => 'staff',
+                'format' => '{name}',
+            ],
+            'currencies_id' => [
+                'relation' => 'currency',
+                'format' => '{name}',
+            ],
+            'invoice_types_id'  =>  [
+                'relation'  =>  'invoice_type',
+                'format'    =>  '{name}',
+            ],
+            'invoice_methods_id'    =>  [
+                'relation'  =>  'invoice_method',
+                'format'    =>  '{name}',
+            ],
+            'invoice_categories_id' =>  [
+                'relation'  =>  'invoice_category',
+                'format'    =>  '{name}',
+            ],
         ],
     ];
 

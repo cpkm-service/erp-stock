@@ -166,10 +166,10 @@
             cancelButtonText: '{{__('admin::backend.common.cancel')}}',
         }).then(function(result){
             if(result.isConfirmed) {
-                Codebase.block('state_toggle','.block-rounded');
+                // Codebase.block('state_toggle','.block-rounded');
                 sendApi(`${url}/${deleteId}`,"DELETE",{}).then(function(){
                     search.ajax.reload(function(){
-                        Codebase.block('state_toggle','.block-rounded');
+                        // Codebase.block('state_toggle','.block-rounded');
                     });
                 });
             }

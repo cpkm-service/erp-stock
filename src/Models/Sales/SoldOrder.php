@@ -9,7 +9,9 @@ class SoldOrder extends Model
 {
     protected $table = 'sales_sold_orders';
 
-    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
+    protected static $prefix = 'erp-stock::';
+
+    use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait, \Cpkm\ErpStock\Traits\ModelTrait;
 
     protected $fillable = [
         'date',
@@ -81,6 +83,56 @@ class SoldOrder extends Model
             'customer_phone',
             'project_managements_id',
         ],
+        'translation' => [
+            'companies_id'  =>  [
+                'relation'  =>  'company',
+                'format'    =>  '{name}',
+            ],
+            'project_managements_id' => [
+                'relation' => 'project',
+                'format' => '{name}',
+            ],
+            'sales_quote_order_statuses_id' => [
+                'relation' => 'status',
+                'format' => '{name}',
+            ],
+            'departments_id' => [
+                'relation' => 'department',
+                'format' => '{name}',
+            ],
+            'customers_id' => [
+                'relation' => 'customer',
+                'format' => '{name}',
+            ],
+            'customer_contacts_id' => [
+                'relation' => 'contact',
+                'format' => '{name}',
+            ],
+            'staff_id' => [
+                'relation' => 'staff',
+                'format' => '{name}',
+            ],
+            'make_id' => [
+                'relation' => 'staff',
+                'format' => '{name}',
+            ],
+            'currencies_id' => [
+                'relation' => 'currency',
+                'format' => '{name}',
+            ],
+            'invoice_types_id'  =>  [
+                'relation'  =>  'invoice_type',
+                'format'    =>  '{name}',
+            ],
+            'invoice_methods_id'    =>  [
+                'relation'  =>  'invoice_method',
+                'format'    =>  '{name}',
+            ],
+            'invoice_categories_id' =>  [
+                'relation'  =>  'invoice_category',
+                'format'    =>  '{name}',
+            ],
+        ],
     ];
 
     protected $appends = [
@@ -134,43 +186,6 @@ class SoldOrder extends Model
     {
         return $this->morphMany(SoldOrderItem::class, 'sourceable');
     }
-
-    public function project()
-    {
-        return $this->hasOne(\App\Models\ProjectManagement::class, 'id', 'project_managements_id');
-    }
-
-    /**
-     * 人員
-     *
-     * @return void
-     */
-    public function staff() {
-        return $this->hasOne(\App\Models\Staff::class, 'id', 'staff_id');
-    }
-    
-    /**
-     * 客戶
-     *
-     * @return void
-     */
-    public function customer() {
-        return $this->hasOne(\App\Models\Customer::class, 'id', 'customers_id');
-    }
-    
-    /**
-     * 部門
-     *
-     * @return void
-     */
-    public function department() {
-        return $this->hasOne(\App\Models\Department::class, 'id', 'departments_id');
-    }
-
-    public function contact() {
-        return $this->hasOne(\App\Models\CustomerContact::class, 'id', 'customer_contacts_id');
-    }
-
     public function sourceable() {
         return $this->morphTo();
     }

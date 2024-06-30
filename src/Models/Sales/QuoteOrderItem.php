@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class QuoteOrderItem extends Model
 {
     protected $table = 'sales_quote_order_items';
+
+    protected static $prefix = 'erp-stock::';
     
     use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
@@ -109,5 +111,9 @@ class QuoteOrderItem extends Model
 
     public function sales_order_items() {
         return $this->hasMany(OrderItem::class, 'sales_quote_order_items_id', 'id');
+    }
+
+    public function product_stock_list() {
+        return $this->morphOne(\App\Models\ProductStockList::class, 'sourceable');
     }
 }

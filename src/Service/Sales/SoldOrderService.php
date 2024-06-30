@@ -46,6 +46,10 @@ class SoldOrderService extends OrderItemService
     protected $SystemSettingRepository;
     
     protected $items_folder = 'sales_sold_order_items';
+
+    protected $stock_type = 'reduce';
+
+    protected $stock_expected = false;
     /** 
      * 建構子
      * @version 1.0
@@ -104,6 +108,7 @@ class SoldOrderService extends OrderItemService
             $data = $this->calculateAmount($this->dataHandle($data));
             $createData =  Arr::only($data, $this->SalesSoldOrderRepository->getDetailFields());
             $createData['no']   =   $this->makeNo($createData['date']);
+            $createData['make_id'] = auth()->user()->staff?->id;
             $model     =   $this->SalesSoldOrderRepository->create($createData);
             if(!$model){
                 throw new ErrorException(__('backend.errors.insertFail'), 500);
@@ -160,6 +165,23 @@ class SoldOrderService extends OrderItemService
      */
     public function delete(string $id) {
         $model =  $this->getSalesSoldOrder($id);
+        $model->sourceable->update([
+            'sales_order_statuses_id'    =>  1,
+        ]);
+        $model->items->each(function($item) {
+            $item->delete();
+            $product_stock_list = $item->product_stock_list;
+            if($product_stock_list) {
+                $product_stock = $product_stock_list->product_stock;
+                if($product_stock) {
+                    $product_stock->update([
+                        'stock' => $product_stock->stock - $product_stock_list->count,
+                        'expected_stock' => $product_stock->expected_stock - $product_stock_list->expected_count,
+                    ]);
+                }
+                $product_stock_list->delete();
+            }
+        });
         $model->delete();
         if(!$model){
             throw new ErrorException(__('backend.errors.deleteFail'), 500);

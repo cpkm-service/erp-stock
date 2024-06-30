@@ -88,6 +88,7 @@ class QuoteOrderService extends OrderItemService
             $data = $this->calculateAmount($this->dataHandle($data));
             $createData =  Arr::only($data, $this->SalesQuoteOrderRepository->getDetailFields());
             $createData['no']   =   $this->makeNo($createData['date']);
+            $createData['make_id'] = auth()->user()->staff?->id;
             $model     =   $this->SalesQuoteOrderRepository->create($createData);
             if(!$model){
                 throw new ErrorException(__('backend.errors.insertFail'), 500);

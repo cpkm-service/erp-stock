@@ -9,6 +9,8 @@ class SoldOrderItem extends Model
 {
     protected $table = 'sales_sold_order_items';
 
+    protected static $prefix = 'erp-stock::';
+
     use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
@@ -61,7 +63,12 @@ class SoldOrderItem extends Model
             'size',
             'delivery_date',
             'quote_count',
-            'sales_order_items_id',
+        ],
+        'translation' => [
+            'products_id' => [
+                'relation' => 'product',
+                'format' => '{product_serial}',
+            ],
         ],
     ];
 
@@ -97,12 +104,20 @@ class SoldOrderItem extends Model
         return $this->morphTo();
     }
 
+    public function product() {
+        return $this->hasOne(\App\Models\Product::class, 'id', 'products_id');
+    }
+
     public function sales_order_items() {
         return $this->hasMany(SalesOrderItem::class, 'sales_order_items_id', 'id');
     }
 
     public function sales_sold_return_order_items() {
         return $this->hasMany(SoldReturnOrderItem::class, 'sales_sold_order_items_id', 'id');
+    }
+
+    public function product_stock_list() {
+        return $this->morphOne(\App\Models\ProductStockList::class, 'sourceable');
     }
 
 }

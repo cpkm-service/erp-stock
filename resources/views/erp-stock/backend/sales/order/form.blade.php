@@ -175,10 +175,15 @@
                         });
                 }
                 $(`select[name="project_managements_id"]`).val(result.data.project_managements_id).trigger('change');
+                $(`select[name="companies_id"]`).attr('transfer', true).val(result.data.companies_id).trigger('change').attr('transfer', false);
                 $(`select[name="customers_id"]`).attr('transfer', true).val(result.data.customers_id).trigger('change').attr('transfer', false);
                 $(`select[name="staff_id"]`).val(result.data.staff_id).trigger('change');
+                $(`select[name="departments_id"]`).val(result.data.departments_id).trigger('change');
                 $(`input[name="delivery_date"]`).val(result.data.delivery_date);
+                $(`input[name="customer_address"]`).val(result.data.customer_address);
+                $(`input[name="customer_phone"]`).val(result.data.customer_phone);
                 setTimeout(function() {
+                    $(`select[name="customer_contacts_id"]`).val(result.data.customer_contacts_id).trigger('change');
                     $(`select[name="currencies_id"]`).val(result.data.currencies_id).trigger('change');
                     $(`input[name="invoice_types_id"][value="${result.data.invoice_types_id}"]`).prop("checked", true).trigger("change");
                     $(`input[name="invoice_methods_id"][value="${result.data.invoice_methods_id}"]`).prop("checked", true).trigger("change");
@@ -198,6 +203,7 @@
                         $(`input[data-name="items[${i}][count]"]`).val(item.count).trigger('keyup');
                         $(`input[name="items[${i}][sales_quote_order_items_id]"]`).val(item.id);
                         $(`input[name="items[${i}][remark]"]`).val(item.remark);
+                        $(`input[name="items[${i}][description]"]`).val(item.description);
                         $(`input[name="items[${i}][file]"]`)
                         if(item.file) {
                             let name = item.file.split('/');
@@ -247,7 +253,7 @@
         });
         @endif
     @endif
-    @if(request()->sourceable_id)
+    @if(request()->sourceable_type)
     $(`select[name="sourceable_type"]`).val('{{addslashes(request()->sourceable_type)}}').trigger('change');
     @endif
 

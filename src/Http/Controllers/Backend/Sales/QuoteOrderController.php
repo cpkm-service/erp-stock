@@ -37,6 +37,12 @@ class QuoteOrderController extends Controller
         $this->fields = config('erp-stock.sales_quote_orders.form.fields');
         $this->QuoteOrderService = app(config('erp-stock.sales_quote_orders.service'));
         $this->init();
+        $this->fields['sourceable_type']['options'] = [
+            [
+                'value' =>  \Cpkm\ErpStock\Models\Sales\QuoteOrder::class,
+                'name'  =>  '報價單',
+            ]
+        ];
         $this->SystemSettingsService = app(SystemSettingsService::class);
         $this->fields['customers_id']['options'] = $this->CustomerService->select(1);
         $this->form['back'] =   route('backend.sales.quote_order.index');
@@ -49,13 +55,13 @@ class QuoteOrderController extends Controller
         if(request()->expectsJson()) {
             if(request()->action == 'sourceable_type') {
                 return response()->json([   
-                    "data"  =>  $this->SoldOrderService->select([
-                        'sales_sold_order_statuses_id'    =>  1,
+                    "data"  =>  $this->QuoteOrderService->select([
+                        'sales_quote_order_statuses_id'    =>  1,
                     ])
                 ]);
             }else if(request()->action == 'sourceable_id') {
                 return response()->json([   
-                    "data"  =>  $this->SoldOrderService->getSalesSoldOrder(request()->id),
+                    "data"  =>  $this->QuoteOrderService->getSalesQuoteOrder(request()->id),
                 ]);
             }else if(request()->action) {
                 return $this->getAjaxData();
@@ -79,7 +85,7 @@ class QuoteOrderController extends Controller
         $data['tax_percentage'] =   $this->SystemSettingsService->getSetting('tax_percentage')??0;
         $data['decimal_point'] =   $this->SystemSettingsService->getSetting('decimal_point')??0;
         \View::share('fields',$this->fields);
-        return view('erp-stock::backend.sales.order.form', $data);
+        return view('erp-stock::backend.sales.quote_order.form', $data);
     }
 
     /**
@@ -106,6 +112,7 @@ class QuoteOrderController extends Controller
                 }
                 $this->fields[$field]['value']  =   $value;
             }else if($field == 'sourceable'){
+                $this->fields['sourceable_id']['options'] = $this->QuoteOrderService->select();
                 $this->fields['sourceable_type']['disabled'] = true;
                 $this->fields['sourceable_id']['disabled'] = true;
             }else if($field == 'customers_id'){
@@ -120,6 +127,7 @@ class QuoteOrderController extends Controller
                         'name'  =>  $item->name,
                     ];
                 })->toArray();
+                $this->fields['customer_contacts_id']['value'] = $detail['customer_contacts_id'];
             }else if(isset($this->fields[$field])) {
                 $this->fields[$field]['value']  =   $value;
                 if($this->show) {

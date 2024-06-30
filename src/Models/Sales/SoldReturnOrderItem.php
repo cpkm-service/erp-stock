@@ -9,6 +9,8 @@ class SoldReturnOrderItem extends Model
 {
     protected $table = 'sales_sold_return_order_items';
 
+    protected static $prefix = 'erp-stock::';
+
     use HasFactory, \Cpkm\Admin\Traits\ObserverTrait, \Cpkm\Admin\Traits\QueryTrait;
 
     protected $fillable = [
@@ -63,6 +65,12 @@ class SoldReturnOrderItem extends Model
             'quote_count',
             'sales_sold_order_items_id',
         ],
+        'translation' => [
+            'products_id' => [
+                'relation' => 'product',
+                'format' => '{product_serial}',
+            ],
+        ],
     ];
 
     public $detail = [
@@ -92,6 +100,10 @@ class SoldReturnOrderItem extends Model
 
     protected $casts = [
     ];
+
+    public function product() {
+        return $this->hasOne(\App\Models\Product::class, 'id', 'products_id');
+    }
 
     public function sourceable() {
         return $this->morphTo();

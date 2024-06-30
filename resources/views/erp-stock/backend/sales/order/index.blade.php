@@ -122,9 +122,9 @@
             if(result.isConfirmed) {
                 // Codebase.block('state_toggle','.block-rounded');
                 sendApi(`${url}/${deleteId}`,"DELETE",{}).then(function(){
-                    // search.ajax.reload(function(){
+                    search.ajax.reload(function(){
                     //     Codebase.block('state_toggle','.block-rounded');
-                    // });
+                    });
                 });
             }
         })

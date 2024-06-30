@@ -94,6 +94,11 @@ class OrderItemService
             return $model;
         });
     }
+
+    protected $stock_type;
+
+    protected $stock_expected;
+    
         
     /**
      * 設定項目
@@ -113,7 +118,7 @@ class OrderItemService
         
         if($data[$key]??false) {
             foreach ($data[$key] as $sort => $item) {
-                if($item['type']??false == 2) {
+                if(($item['type']??false) == 2) {
                     $product = $ProductService->index(['product_serial' => $item['product_number']], false)->first();
                     if(!$product) {
                         $product = $ProductService->store([
@@ -147,9 +152,11 @@ class OrderItemService
                     $search->update($item);
                     unset($all_data[array_search($item['id'],$all_data)]);
                 }else{
-                    $model->{$key}()->create($item);
+                    $search = $model->{$key}()->create($item);
                 }
-                
+                if($this->stock_type) {
+                    $ProductService->setProduct($product)->setDepot($product?->depots_id)->handleDepotStock($this->stock_type, $search, $this->stock_expected);
+                }
             }
         }
         foreach ($all_data as $id) {

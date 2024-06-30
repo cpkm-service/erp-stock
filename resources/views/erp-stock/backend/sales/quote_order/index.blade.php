@@ -123,10 +123,9 @@
                 // Codebase.block('state_toggle','.block-rounded');
                 sendApi(`${url}/${deleteId}`,"DELETE",{}).then(function(){
                     location.reload();
-                    // console.log(123);
-                    // search.ajax.reload(function(){
+                    search.ajax.reload(function(){
                     //     Codebase.block('state_toggle','.block-rounded');
-                    // });
+                    });
                 });
             }
         })

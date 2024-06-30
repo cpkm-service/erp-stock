@@ -48,6 +48,10 @@ class OrderService extends OrderItemService
     protected $SystemSettingRepository;
     
     protected $items_folder = 'sales_order_items';
+
+    protected $stock_type = 'reduce';
+
+    protected $stock_expected = true;
     
     /** 
      * 建構子
@@ -107,7 +111,7 @@ class OrderService extends OrderItemService
             $data = $this->calculateAmount($this->dataHandle($data));
             $createData =  Arr::only($data, $this->SalesOrderRepository->getDetailFields());
             $createData['no']   =   $this->makeNo($createData['date']);
-            
+            $createData['make_id'] = auth()->user()->staff?->id;
             $model     =   $this->SalesOrderRepository->create($createData);
             if(!$model){
                 throw new ErrorException(__('backend.errors.insertFail'), 500);
@@ -155,12 +159,30 @@ class OrderService extends OrderItemService
      * @author Henry
      */
     public function delete(string $id) {
-        $model =  $this->getSalesOrder($id);
-        $model->delete();
-        if(!$model){
-            throw new ErrorException(__('backend.errors.deleteFail'), 500);
-        }
-        return $model;
+        return \DB::transaction(function() use ($id){
+            $model =  $this->getSalesOrder($id);
+            $model->sourceable->update([
+                'sales_quote_order_statuses_id'    =>  1,
+            ]);
+            $model->items->each(function($item) {
+                $item->delete();
+                $product_stock_list = $item->product_stock_list;
+                if($product_stock_list) {
+                    $product_stock = $product_stock_list->product_stock;
+                    if($product_stock) {
+                        $product_stock->update([
+                            'expected_stock' => $product_stock->expected_stock - $product_stock_list->expected_count,
+                        ]);
+                    }
+                    $product_stock_list->delete();
+                }
+            });
+            $model->delete();
+            if(!$model){
+                throw new ErrorException(__('backend.errors.deleteFail'), 500);
+            }
+            return $model;
+        });
     }
     
     /**
@@ -187,42 +209,6 @@ class OrderService extends OrderItemService
                 'name'  =>  "{$item->project?->name} ({$item->no})"
             ];
         })->toArray();
-    }
-
-    public function setItems($model, $data) {
-        $ProductService = app(ProductService::class);
-        $key = 'items';
-        $all_data = $model->{$key}->pluck('id')->toArray();
-        if($data[$key]??false) {
-            foreach ($data[$key] as $sort => $item) {
-                if(isset($item['file']) && $item['file'] && $item['file'] instanceof \Illuminate\Http\UploadedFile) {
-                    $item['file'] = $item['file']->storeAs('sales_order_item', date('YmdHis')."-".$item['file']->getClientOriginalName() , 'public');
-                }
-
-                $product = $ProductService->getProduct($item['products_id']);
-                $item['name']       = $product->product_name;
-                $item['standard']   = $product->product_standard;
-                $item['size']       = $product->size;
-
-                if(isset($item['id'])) {
-                    $search = $model->{$key}()->where([
-                        'id' => $item['id']
-                    ])->first();
-                }
-
-                if($search??false) {
-                    $search->update($item);
-                    unset($all_data[array_search($item['id'],$all_data)]);
-                }else{
-                    $model->{$key}()->create($item);
-                }
-            }
-        }
-        foreach ($all_data as $id) {
-            $model->{$key}()->where([
-                'id' => $id,
-            ])->delete();
-        }
     }
 
 }

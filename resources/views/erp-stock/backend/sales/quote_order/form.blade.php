@@ -6,7 +6,7 @@
             <button class="btn @if($detail->status?->id == 1) btn-warning @elseif($detail->status?->id == 2) btn-primary @else btn-danger @endif" type="button" id="close" data-id="{{$detail->id}}">{{$detail->status->name}}</button>
             
             @if($detail->status?->id == 1 && !$detail->order()->exists())
-            <a href="{{route('backend.sales.quote_order.create',['quote_order' => request()->quote_order])}}" class="btn btn-primary">議價</a>
+            <a href="{{route('backend.sales.quote_order.create',['sourceable_type' => \Cpkm\ErpStock\Models\Sales\QuoteOrder::class, 'sourceable_id' => $detail->id])}}" class="btn btn-primary">議價</a>
             <a href="{{route('backend.sales.order.create',['sourceable_type' => config('erp-stock.sales_quote_orders.model'), 'sourceable_id' => $detail->id])}}" class="btn btn-success">轉訂購單</a>
             @else
                 @if($detail->order()->exists())
@@ -173,89 +173,94 @@
     var init = true;
     var url = "{{route('backend.sales.quote_order.index')}}";
     var rate = new Rate({{$decimal_point}}, {{$tax_percentage}}, {{config('erp.calibration')}});
-    // $(`select[name="sourceable_type"]`).change(function(){
-    //     if($(this).val() != '') {
-    //         sendApi(`${url}`,"GET",{
-    //             action: "sourceable_type",
-    //             type: $(this).val()
-    //         },function(result) {
-    //             let str = '<option value=""></option>';
-    //             result.data.map((item) => {
-    //                 str += `<option value="${item.value}">${item.name}</option>`
-    //             });
-    //             $(`select[name="sourceable_id"]`).html(str);
-    //             if(init) {
-    //                 $(`select[name="sourceable_id"]`).val('{{addslashes(request()->sourceable_id)}}').trigger('change');
-    //                 init = false;
-    //             }
-    //         });
-    //     }
-    // });
-    // $(`select[name="sourceable_id"]`).change(function(){
-    //     let id = $(this).val();
-    //     if(id) {
-    //         sendApi(`${url}`,"GET",{
-    //             action: "sourceable_id",
-    //             type: $(`select[name="sourceable_type"]`).val(),
-    //             id: id,
-    //         },function(result) {
-    //             $('#items_area').html('');
-    //             if(result.data.file) {
-    //                 let file = result.data.file;
-    //                 let name = file.split('/');
-    //                 getFileFromURL('{{asset('storage')}}/'+file, name.pop())
-    //                     .then(file => {
-    //                         const dataTransfer = new DataTransfer();
-    //                         dataTransfer.items.add(file);
-    //                         $(`input[name="file"]`)[0].files = dataTransfer.files;
-    //                         $(`input[name="file"]`).trigger('change')
-    //                         // 可以將其用於你的程式邏輯中
-    //                     });
-    //             }
-    //             // $(`select[name="projects_id"]`).val(result.data.projects_id).trigger('change');
-    //             $(`select[name="customers_id"]`).attr('transfer', true).val(result.data.customers_id).trigger('change').attr('transfer', false);
-    //             $(`select[name="staff_id"]`).val(result.data.customer_staff_id).trigger('change');
-    //             $(`input[name="delivery_date"]`).val(result.data.delivery_date);
-    //             setTimeout(function() {
-    //                 $(`select[name="currencies_id"]`).val(result.data.currencies_id).trigger('change');
-    //                 $(`input[name="invoice_types_id"][value="${result.data.invoice_types_id}"]`).prop("checked", true).trigger("change");
-    //                 $(`input[name="invoice_methods_id"][value="${result.data.invoice_methods_id}"]`).prop("checked", true).trigger("change");
-    //                 $(`input[name="invoice_categories_id"][value="${result.data.invoice_categories_id}"]`).prop("checked", true).trigger("change");                
-    //             }, 500);
-    //             $(`textarea[name="remark"]`).val(result.data.remark);
-    //             $(`textarea[name="remark"]`).text(result.data.remark)
-    //             result.data.items.map((item, key) => {
-    //                 let i = key + 1;
-    //                 $(`#items_template_add`).click();
-    //                 setTimeout(() => {
-    //                     $(`select[name="items[${i}][products_id]"]`).attr('transfer', true).val(item.products_id).trigger('change');
-    //                     $(`input[name="items[${i}][name]"]`).val(item.name);
-    //                     $(`input[name="items[${i}][standard]"]`).val(item.standard);
-    //                     $(`input[name="items[${i}][size]"]`).val(item.size);
-    //                     $(`input[name="items[${i}][unit]"]`).val(item.unit);
-    //                     $(`select[name="items[${i}][depots_id]"]`).val(item.depots_id).trigger('change');
-    //                     $(`input[data-name="items[${i}][unit_amount]"]`).val(item.unit_amount).trigger('keyup');
-    //                     $(`input[data-name="items[${i}][factory_hours]"]`).val(item.factory_hours).trigger('keyup');
-    //                     $(`input[data-name="items[${i}][count]"]`).val(item.count).trigger('keyup');
-    //                     $(`input[name="items[${i}][remark]"]`).val(item.remark);
-    //                     $(`input[name="items[${i}][file]"]`)
-    //                     if(item.file) {
-    //                         let name = item.file.split('/');
-    //                         getFileFromURL('{{asset('storage')}}/'+item.file, name.pop())
-    //                         .then(file => {
-    //                             const dataTransfer = new DataTransfer();
-    //                             dataTransfer.items.add(file);
-    //                             $(`input[name="items[${i}][file]"]`)[0].files = dataTransfer.files;
-    //                             $(`input[name="items[${i}][file]"]`).trigger('change')
-    //                             // 可以將其用於你的程式邏輯中
-    //                         });
-    //                     }
-    //                     $(`select[name="items[${i}][products_id]"]`).removeAttr('transfer')
-    //                 }, 300);
-    //             });
-    //         });
-    //     }
-    // });
+    $(`select[name="sourceable_type"]`).change(function(){
+        if($(this).val() != '') {
+            sendApi(`${url}`,"GET",{
+                action: "sourceable_type",
+                type: $(this).val()
+            },function(result) {
+                let str = '<option value=""></option>';
+                result.data.map((item) => {
+                    str += `<option value="${item.value}">${item.name}</option>`
+                });
+                $(`select[name="sourceable_id"]`).html(str);
+                if(init) {
+                    $(`select[name="sourceable_id"]`).val('{{addslashes(request()->sourceable_id)}}').trigger('change');
+                    init = false;
+                }
+            });
+        }
+    });
+    $(`select[name="sourceable_id"]`).change(function(){
+        let id = $(this).val();
+        if(id) {
+            sendApi(`${url}`,"GET",{
+                action: "sourceable_id",
+                type: $(`select[name="sourceable_type"]`).val(),
+                id: id,
+            },function(result) {
+                $('#items_area').html('');
+                if(result.data.file) {
+                    let file = result.data.file;
+                    let name = file.split('/');
+                    getFileFromURL('{{asset('storage')}}/'+file, name.pop())
+                        .then(file => {
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            $(`input[name="file"]`)[0].files = dataTransfer.files;
+                            $(`input[name="file"]`).trigger('change')
+                            // 可以將其用於你的程式邏輯中
+                        });
+                }
+                $(`select[name="project_managements_id"]`).val(result.data.project_managements_id).trigger('change');
+                $(`select[name="companies_id"]`).attr('transfer', true).val(result.data.companies_id).trigger('change').attr('transfer', false);
+                $(`select[name="customers_id"]`).attr('transfer', true).val(result.data.customers_id).trigger('change').attr('transfer', false);
+                $(`select[name="staff_id"]`).val(result.data.staff_id).trigger('change');
+                $(`select[name="departments_id"]`).val(result.data.departments_id).trigger('change');
+                $(`input[name="delivery_date"]`).val(result.data.delivery_date);
+                $(`input[name="customer_address"]`).val(result.data.customer_address);
+                $(`input[name="customer_phone"]`).val(result.data.customer_phone);
+                $(`input[name="quote_start_date"]`).val(result.data.quote_start_date);
+                $(`input[name="quote_end_date"]`).val(result.data.quote_end_date);
+                setTimeout(function() {
+                    $(`select[name="customer_contacts_id"]`).val(result.data.customer_contacts_id).trigger('change');
+                    $(`select[name="currencies_id"]`).val(result.data.currencies_id).trigger('change');
+                    $(`input[name="invoice_types_id"][value="${result.data.invoice_types_id}"]`).prop("checked", true).trigger("change");
+                    $(`input[name="invoice_methods_id"][value="${result.data.invoice_methods_id}"]`).prop("checked", true).trigger("change");
+                    $(`input[name="invoice_categories_id"][value="${result.data.invoice_categories_id}"]`).prop("checked", true).trigger("change");                
+                }, 500);
+                $(`textarea[name="remark"]`).text(result.data.remark)
+                result.data.items.map((item, key) => {
+                    let i = key + 1;
+                    $(`#items_template_add`).click();
+                    setTimeout(() => {
+                        $(`select[name="items[${i}][products_id]"]`).attr('transfer', true).val(item.products_id).trigger('change');
+                        $(`input[name="items[${i}][name]"]`).val(item.name);
+                        $(`input[name="items[${i}][standard]"]`).val(item.standard);
+                        $(`input[name="items[${i}][size]"]`).val(item.size);
+                        $(`input[name="items[${i}][unit]"]`).val(item.unit);
+                        $(`input[data-name="items[${i}][unit_amount]"]`).val(item.unit_amount).trigger('keyup');
+                        $(`input[data-name="items[${i}][count]"]`).val(item.count).trigger('keyup');
+                        $(`input[name="items[${i}][remark]"]`).val(item.remark);
+                        $(`input[name="items[${i}][description]"]`).val(item.description);
+                        $(`input[name="items[${i}][file]"]`)
+                        if(item.file) {
+                            let name = item.file.split('/');
+                            getFileFromURL('{{asset('storage')}}/'+item.file, name.pop())
+                            .then(file => {
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                $(`input[name="items[${i}][file]"]`)[0].files = dataTransfer.files;
+                                $(`input[name="items[${i}][file]"]`).trigger('change')
+                                // 可以將其用於你的程式邏輯中
+                            });
+                        }
+                        $(`select[name="items[${i}][products_id]"]`).removeAttr('transfer')
+                    }, 300);
+                });
+            });
+        }
+    });
     @if(!($show??false))
     
     main_calibration = Math.pow(10, {{config('erp.calibration')}});
@@ -287,9 +292,9 @@
         });
         @endif
     @endif
-    // @if(request()->sourceable_id)
-    //     $(`select[name="sourceable_id"]`).val('{{addslashes(request()->sourceable_id)}}').trigger('change');
-    // @endif
+    @if(request()->sourceable_type)
+    $(`select[name="sourceable_type"]`).val('{{addslashes(request()->sourceable_type)}}').trigger('change');
+    @endif
 
 </script>
 @endpush
